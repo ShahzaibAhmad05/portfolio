@@ -5,11 +5,13 @@ import { useState } from "react";
 const skills = [
   {
     title: "Web Development",
-    description: "Building fast, accessible, and responsive web apps with modern frameworks.",
+    description:
+      "Building fast, accessible, and responsive web apps with modern frameworks.",
   },
   {
     title: "Backend & APIs",
-    description: "Designing reliable APIs and services that scale with your product.",
+    description:
+      "Designing reliable APIs and services that scale with your product.",
   },
   {
     title: "UI/UX Design",
@@ -17,24 +19,28 @@ const skills = [
   },
   {
     title: "DevOps & Deployment",
-    description: "Setting up CI/CD, hosting, and infrastructure so shipping is effortless.",
+    description:
+      "Setting up CI/CD, hosting, and infrastructure so shipping is effortless.",
   },
 ];
 
 const projects = [
   {
     title: "Project One",
-    description: "A short description of this project and the problem it solves.",
+    description:
+      "A short description of this project and the problem it solves.",
     tags: ["Next.js", "TypeScript"],
   },
   {
     title: "Project Two",
-    description: "A short description of this project and the problem it solves.",
+    description:
+      "A short description of this project and the problem it solves.",
     tags: ["React", "Node.js"],
   },
   {
     title: "Project Three",
-    description: "A short description of this project and the problem it solves.",
+    description:
+      "A short description of this project and the problem it solves.",
     tags: ["Python", "PostgreSQL"],
   },
 ];
@@ -45,32 +51,34 @@ export default function Home() {
   return (
     <div className="flex flex-1 flex-col">
       <section className="relative flex h-svh w-full flex-col items-center justify-center px-6">
-        <div className="flex w-full max-w-2xl flex-col items-center gap-8">
-          <div className="flex flex-col items-center gap-3 text-center">
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-              What can I build for you?
+        <div className="flex max-w-xl flex-col items-center gap-3">
+          <div className="flex flex-col items-center text-4xl -ml-2 -mb-7 z-1">
+            <h1 className="sm:text-5xl text-3xl font-semibold -mb-17 ml-32">
+              it all starts with a{" "}
             </h1>
-            <p className="max-w-md text-base text-muted sm:text-lg">
-              Freelance developer for hire. Tell me about your project below.
-            </p>
+            <span className="text-accent font-bold text-5xl sm:text-9xl tracking-tight text-shadow-2xl">
+              <span className="text-[165px]">M</span>
+              essage
+            </span>
           </div>
 
           <form
             onSubmit={(event) => event.preventDefault()}
-            className="w-full rounded-3xl border border-border bg-surface p-4 shadow-lg shadow-black/3 sm:p-5"
+            className="w-[535px] rounded-3xl border border-transparent focus-within:border-border bg-surface px-4 py-3 shadow-lg shadow-black/3 sm:px-5 sm:py-4"
           >
             <textarea
               value={prompt}
+              autoFocus={true}
+              rows={2}
               onChange={(event) => setPrompt(event.target.value)}
-              placeholder="Describe what you want to build..."
-              rows={3}
+              placeholder="press enter to send an empty one..."
               className="w-full resize-none bg-transparent text-base text-foreground placeholder:text-muted focus:outline-none"
             />
             <div className="mt-3 flex items-center justify-end">
               <button
                 type="submit"
                 aria-label="Send"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-accent-foreground transition-opacity hover:opacity-90"
+                className="flex h-9 w-9 items-center justify-center text-white transition-opacity hover:opacity-90 rounded-xl hover:bg-background/80"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -80,7 +88,7 @@ export default function Home() {
                   strokeWidth={2}
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="h-4 w-4"
+                  className="h-5 w-5"
                 >
                   <path d="M12 19V5" />
                   <path d="M5 12l7-7 7 7" />
@@ -88,10 +96,19 @@ export default function Home() {
               </button>
             </div>
           </form>
+
+          <button
+            type="button"
+            className="text-sm text-muted underline-offset-4 hover:underline -mt-1 ml-8 mr-auto"
+          >
+            already been here?
+          </button>
         </div>
 
         <div className="absolute bottom-8 flex flex-col items-center gap-2 text-muted">
-          <span className="text-xs uppercase tracking-widest">Scroll to explore</span>
+          <span className="text-xs uppercase tracking-widest">
+            Scroll to explore
+          </span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -125,7 +142,9 @@ export default function Home() {
                 key={skill.title}
                 className="flex flex-col gap-2 rounded-2xl border border-border bg-surface p-6"
               >
-                <h3 className="text-lg font-medium text-foreground">{skill.title}</h3>
+                <h3 className="text-lg font-medium text-foreground">
+                  {skill.title}
+                </h3>
                 <p className="text-sm text-muted">{skill.description}</p>
               </div>
             ))}
@@ -153,7 +172,9 @@ export default function Home() {
                 <div className="flex h-32 w-full items-center justify-center rounded-xl bg-surface-muted text-sm text-muted">
                   Preview
                 </div>
-                <h3 className="text-lg font-medium text-foreground">{project.title}</h3>
+                <h3 className="text-lg font-medium text-foreground">
+                  {project.title}
+                </h3>
                 <p className="text-sm text-muted">{project.description}</p>
                 <div className="flex flex-wrap gap-2 pt-1">
                   {project.tags.map((tag) => (
