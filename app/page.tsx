@@ -65,7 +65,7 @@ export default function Home() {
           <div className="flex max-w-xl flex-col items-center gap-3 mt-15">
             <hr className="w-full border-border border-3" />
             <hr className="w-sm ml-auto border-border border-3 mb-3" />
-            <div className="flex flex-col items-center text-4xl -ml-2 -mb-7 z-1">
+            <div className="flex flex-col items-center text-4xl -ml-2 -mb-7 z-1 cursor-default">
               <h1 className="sm:text-5xl text-3xl font-semibold -mb-17 ml-32">
                 it all starts with a{" "}
               </h1>
@@ -91,7 +91,7 @@ export default function Home() {
                 <button
                   type="submit"
                   aria-label="Send"
-                  className="flex h-9 w-9 items-center justify-center text-white transition-opacity hover:opacity-90 rounded-xl hover:bg-background/80"
+                  className="flex h-9 w-9 items-center justify-center text-white transition-opacity hover:opacity-90 rounded-xl hover:bg-background/90 cursor-pointer"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -112,7 +112,7 @@ export default function Home() {
 
             <button
               type="button"
-              className="text-sm text-muted underline-offset-4 hover:underline -mt-1 ml-8 mr-auto"
+              className="text-sm text-muted underline-offset-4 hover:underline -mt-1 ml-8 mr-auto cursor-pointer"
             >
               already been here?
             </button>

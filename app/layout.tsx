@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Shahzaib — Freelance Developer",
-  description: "Freelance software developer available for hire.",
+  title: "Shahzaib Ahmad Shahid",
+  description: "Your Software Expert.",
 };
 
 export default function RootLayout({
