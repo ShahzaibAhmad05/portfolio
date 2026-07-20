@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 
 const skills = [
@@ -51,63 +52,76 @@ export default function Home() {
   return (
     <div className="flex flex-1 flex-col">
       <section className="relative flex h-svh w-full flex-col items-center justify-center px-6">
-        <div className="flex max-w-xl flex-col items-center gap-3">
-          <div className="flex flex-col items-center text-4xl -ml-2 -mb-7 z-1">
-            <h1 className="sm:text-5xl text-3xl font-semibold -mb-17 ml-32">
-              it all starts with a{" "}
-            </h1>
-            <span className="text-accent font-bold text-5xl sm:text-9xl tracking-tight text-shadow-2xl">
-              <span className="text-[165px]">M</span>
-              essage
-            </span>
-          </div>
+        <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-10 -mt-16">
+          <Image
+            src="/pfp.png"
+            alt="Profile photo"
+            width={500}
+            height={500}
+            priority
+            className="h-40 w-40 shrink-0 object-contain sm:h-100 sm:w-100 grayscale"
+          />
 
-          <form
-            onSubmit={(event) => event.preventDefault()}
-            className="w-[535px] rounded-3xl border border-transparent focus-within:border-border bg-surface px-4 py-3 shadow-lg shadow-black/3 sm:px-5 sm:py-4"
-          >
-            <textarea
-              value={prompt}
-              autoFocus={true}
-              rows={2}
-              onChange={(event) => setPrompt(event.target.value)}
-              placeholder="press enter to send an empty one..."
-              className="w-full resize-none bg-transparent text-base text-foreground placeholder:text-muted focus:outline-none"
-            />
-            <div className="mt-3 flex items-center justify-end">
-              <button
-                type="submit"
-                aria-label="Send"
-                className="flex h-9 w-9 items-center justify-center text-white transition-opacity hover:opacity-90 rounded-xl hover:bg-background/80"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-5 w-5"
-                >
-                  <path d="M12 19V5" />
-                  <path d="M5 12l7-7 7 7" />
-                </svg>
-              </button>
+          <div className="flex max-w-xl flex-col items-center gap-3 mt-15">
+            <hr className="w-full border-border border-3" />
+            <hr className="w-sm ml-auto border-border border-3 mb-3" />
+            <div className="flex flex-col items-center text-4xl -ml-2 -mb-7 z-1">
+              <h1 className="sm:text-5xl text-3xl font-semibold -mb-17 ml-32">
+                it all starts with a{" "}
+              </h1>
+              <span className="text-accent font-bold text-5xl sm:text-9xl tracking-tight text-shadow-2xl">
+                <span className="text-[165px]">M</span>
+                essage
+              </span>
             </div>
-          </form>
 
-          <button
-            type="button"
-            className="text-sm text-muted underline-offset-4 hover:underline -mt-1 ml-8 mr-auto"
-          >
-            already been here?
-          </button>
+            <form
+              onSubmit={(event) => event.preventDefault()}
+              className="w-[535px] rounded-3xl border border-transparent focus-within:border-border hover:border-border bg-surface px-4 py-3 shadow-lg shadow-black/3 sm:px-5 sm:py-4"
+            >
+              <textarea
+                value={prompt}
+                autoFocus={true}
+                rows={2}
+                onChange={(event) => setPrompt(event.target.value)}
+                placeholder="press enter to send an empty one..."
+                className="w-full resize-none bg-transparent text-base text-foreground placeholder:text-muted outline-none"
+              />
+              <div className="mt-3 flex items-center justify-end">
+                <button
+                  type="submit"
+                  aria-label="Send"
+                  className="flex h-9 w-9 items-center justify-center text-white transition-opacity hover:opacity-90 rounded-xl hover:bg-background/80"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-5 w-5"
+                  >
+                    <path d="M12 19V5" />
+                    <path d="M5 12l7-7 7 7" />
+                  </svg>
+                </button>
+              </div>
+            </form>
+
+            <button
+              type="button"
+              className="text-sm text-muted underline-offset-4 hover:underline -mt-1 ml-8 mr-auto"
+            >
+              already been here?
+            </button>
+          </div>
         </div>
 
-        <div className="absolute bottom-8 flex flex-col items-center gap-2 text-muted">
+        <div className="absolute bottom-5 flex flex-col items-center gap-2 text-muted">
           <span className="text-xs uppercase tracking-widest">
-            Scroll to explore
+            Scroll
           </span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
