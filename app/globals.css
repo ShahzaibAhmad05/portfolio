@@ -9,6 +9,27 @@
   --muted: #83807a;
   --accent: #d97757;
   --accent-foreground: #ffffff;
+  --accent-hover: #c96747;
+}
+
+@keyframes nudge-x {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(6px);
+  }
+}
+
+@keyframes nudge-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
 }
 
 @theme inline {
@@ -19,9 +40,12 @@
   --color-border: var(--border);
   --color-muted: var(--muted);
   --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
   --color-accent-foreground: var(--accent-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --animate-nudge-x: nudge-x 1s ease-in-out infinite;
+  --animate-nudge-y: nudge-y 1.2s ease-in-out infinite;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -34,6 +58,7 @@
     --muted: #a8a5a0;
     --accent: #d97757;
     --accent-foreground: #262624;
+    --accent-hover: #cd6e4f;
   }
 }
 

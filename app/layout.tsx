@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Shahzaib Ahmad Shahid",
-  description: "Your Software Expert.",
+  title: "Shahzaib Ahmad Shahid | Software Engineer",
+  description: "Software Engineer with 3+ years of experience, building and fixing stuff for businesses.",
 };
 
 export default function RootLayout({
@@ -27,7 +27,9 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full">
+        {children}
+      </body>
     </html>
   );
 }
