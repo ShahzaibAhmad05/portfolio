@@ -1,214 +1,107 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
-
-const skills = [
-  {
-    title: "Web Development",
-    description:
-      "Building fast, accessible, and responsive web apps with modern frameworks.",
-  },
-  {
-    title: "Backend & APIs",
-    description:
-      "Designing reliable APIs and services that scale with your product.",
-  },
-  {
-    title: "UI/UX Design",
-    description: "Crafting clean, intuitive interfaces that feel great to use.",
-  },
-  {
-    title: "DevOps & Deployment",
-    description:
-      "Setting up CI/CD, hosting, and infrastructure so shipping is effortless.",
-  },
-];
-
-const projects = [
-  {
-    title: "Project One",
-    description:
-      "A short description of this project and the problem it solves.",
-    tags: ["Next.js", "TypeScript"],
-  },
-  {
-    title: "Project Two",
-    description:
-      "A short description of this project and the problem it solves.",
-    tags: ["React", "Node.js"],
-  },
-  {
-    title: "Project Three",
-    description:
-      "A short description of this project and the problem it solves.",
-    tags: ["Python", "PostgreSQL"],
-  },
-];
+import Link from "next/link";
+import { useRef } from "react";
+import { motion, useMotionValue, useSpring } from "framer-motion";
 
 export default function Home() {
-  const [prompt, setPrompt] = useState("");
+  const ref = useRef<HTMLButtonElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const springX = useSpring(x, { stiffness: 250, damping: 25, mass: 0.3 });
+  const springY = useSpring(y, { stiffness: 250, damping: 25, mass: 0.3 });
+
+  function onMouseMove(e: React.MouseEvent<HTMLButtonElement>) {
+    const el = ref.current;
+    if (!el) return;
+    const { left, top, width, height } = el.getBoundingClientRect();
+
+    const magnetDistance = 0.07;
+    x.set((e.clientX - (left + width / 2)) * magnetDistance);
+    y.set((e.clientY - (top + height / 2)) * magnetDistance);
+  }
+
+  function onMouseLeave() {
+    x.set(0);
+    y.set(0);
+  }
 
   return (
-    <div className="flex flex-1 flex-col">
-      <section className="relative flex h-svh w-full flex-col items-center justify-center px-6">
-        <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-10 -mt-16">
+    <div className="flex flex-col">
+      <section className="relative flex flex-col h-svh items-center justify-center">
+        <div className="flex flex-row items-center justify-center mx-28 gap-6">
           <Image
             src="/pfp.png"
             alt="Profile photo"
             width={500}
             height={500}
             priority
-            className="h-40 w-40 shrink-0 object-contain sm:h-100 sm:w-100 grayscale"
+            className="hidden md:block shrink-0 md:h-100 md:w-100 grayscale mb-18"
           />
-
-          <div className="flex max-w-xl flex-col items-center gap-3 mt-15">
-            <hr className="w-full border-border border-3" />
-            <hr className="w-sm ml-auto border-border border-3 mb-3" />
-            <div className="flex flex-col items-center text-4xl -ml-2 -mb-7 z-1 cursor-default">
-              <h1 className="sm:text-5xl text-3xl font-semibold -mb-17 ml-32">
-                it all starts with a{" "}
-              </h1>
-              <span className="text-accent font-bold text-5xl sm:text-9xl tracking-tight text-shadow-2xl">
-                <span className="text-[165px]">M</span>
-                essage
+          <div className="flex flex-col gap-16">
+            <h1 className="text-4xl sm:text-7xl font-semibold text-foreground tracking-tighter flex flex-col">
+              <span className="z-1">Building Software</span>
+              <span className="sm:text-8xl text-accent uppercase font-extrabold -mt-5">
+                3X Faster
               </span>
-            </div>
-
-            <form
-              onSubmit={(event) => event.preventDefault()}
-              className="w-[535px] rounded-3xl border border-transparent focus-within:border-border hover:border-border bg-surface px-4 py-3 shadow-lg shadow-black/3 sm:px-5 sm:py-4"
-            >
-              <textarea
-                value={prompt}
-                autoFocus={true}
-                rows={2}
-                onChange={(event) => setPrompt(event.target.value)}
-                placeholder="press enter to send an empty one..."
-                className="w-full resize-none bg-transparent text-base text-foreground placeholder:text-muted outline-none"
-              />
-              <div className="mt-3 flex items-center justify-end">
-                <button
-                  type="submit"
-                  aria-label="Send"
-                  className="flex h-9 w-9 items-center justify-center text-white transition-opacity hover:opacity-90 rounded-xl hover:bg-background/90 cursor-pointer"
+              <span className="text-4xl tracking-tight -mt-3">
+                than your AI Does
+              </span>
+            </h1>
+            <div className="flex flex-col items-center gap-1">
+              <motion.button
+                ref={ref}
+                style={{ x: springX, y: springY }}
+                onMouseMove={onMouseMove}
+                onMouseLeave={onMouseLeave}
+                className="group bg-accent text-surface py-4 rounded-3xl text-4xl font-sans font-extrabold flex flex-row items-center justify-center gap-2 hover:bg-accent-hover w-full"
+              >
+                Click to Begin
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="size-8 animate-nudge-x group-hover:[animation-play-state:paused]"
+                  aria-hidden
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-5 w-5"
-                  >
-                    <path d="M12 19V5" />
-                    <path d="M5 12l7-7 7 7" />
-                  </svg>
-                </button>
-              </div>
-            </form>
-
-            <button
-              type="button"
-              className="text-sm text-muted underline-offset-4 hover:underline -mt-1 ml-8 mr-auto cursor-pointer"
-            >
-              already been here?
-            </button>
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </motion.button>
+              <Link
+                href="#"
+                className="text-muted text-sm hover:text-foreground hover:underline underline-offset-4 ml-5 mr-auto"
+              >
+                Already been here?
+              </Link>
+            </div>
           </div>
         </div>
-
-        <div className="absolute bottom-5 flex flex-col items-center gap-2 text-muted">
-          <span className="text-xs uppercase tracking-widest">
-            Scroll
-          </span>
+        <a
+          href="#next"
+          className="absolute bottom-5 flex flex-col items-center gap-1 text-muted hover:text-foreground transition-colors"
+          aria-label="Scroll down"
+        >
+          <span className="text-sm tracking-wider uppercase">Scroll</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth={2}
+            strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="h-4 w-4 animate-bounce"
+            className="size-5 animate-nudge-y"
+            aria-hidden
           >
-            <path d="M12 5v14" />
-            <path d="M19 12l-7 7-7-7" />
+            <path d="M12 5v14M6 13l6 6 6-6" />
           </svg>
-        </div>
+        </a>
       </section>
-
-      <section className="w-full px-6 py-24 sm:py-32">
-        <div className="mx-auto flex w-full max-w-5xl flex-col gap-12">
-          <div className="flex flex-col gap-3">
-            <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-              What I do
-            </h2>
-            <p className="max-w-md text-base text-muted">
-              A few of the things I bring to every project.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {skills.map((skill) => (
-              <div
-                key={skill.title}
-                className="flex flex-col gap-2 rounded-2xl border border-border bg-surface p-6"
-              >
-                <h3 className="text-lg font-medium text-foreground">
-                  {skill.title}
-                </h3>
-                <p className="text-sm text-muted">{skill.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="w-full px-6 py-24 sm:py-32">
-        <div className="mx-auto flex w-full max-w-5xl flex-col gap-12">
-          <div className="flex flex-col gap-3">
-            <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-              Selected work
-            </h2>
-            <p className="max-w-md text-base text-muted">
-              A sample of projects I&apos;ve worked on.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-            {projects.map((project) => (
-              <div
-                key={project.title}
-                className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-6"
-              >
-                <div className="flex h-32 w-full items-center justify-center rounded-xl bg-surface-muted text-sm text-muted">
-                  Preview
-                </div>
-                <h3 className="text-lg font-medium text-foreground">
-                  {project.title}
-                </h3>
-                <p className="text-sm text-muted">{project.description}</p>
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {project.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full bg-surface-muted px-3 py-1 text-xs text-muted"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <footer className="w-full border-t border-border px-6 py-10 text-center text-sm text-muted">
-        © {new Date().getFullYear()} Shahzaib. Available for freelance work.
-      </footer>
     </div>
   );
 }
