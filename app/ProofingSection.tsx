@@ -5,16 +5,6 @@ import { motion } from "framer-motion";
 
 const reviews = [
   {
-    name: "Forexgump",
-    location: "Switzerland",
-    text: "Excellent work. I would work with him again anytime.",
-    details: "Worked on developing a python desktop app.",
-    proof:
-      "https://www.fiverr.com/shahzaibahmad05/convert-your-python-projects-to-exe",
-    proofTagline: "Review from Fiverr; Click to see the proof",
-    featured: ["excellent communication", "professionalism"],
-  },
-  {
     name: "Mamashka",
     location: "United States",
     text: "Simply the best",
@@ -22,7 +12,17 @@ const reviews = [
     proof:
       "https://www.fiverr.com/shahzaibahmad05/convert-your-python-projects-to-exe",
     proofTagline: "Review from Fiverr; Click to see the proof",
-    featured: ["excellent communication", "professionalism"],
+    featured: ["Attention to details", "Exceeded expectations"],
+  },
+  {
+    name: "Forexgump",
+    location: "Switzerland",
+    text: "Excellent work. I would work with him again anytime.",
+    details: "Worked on developing a python desktop app.",
+    proof:
+      "https://www.fiverr.com/shahzaibahmad05/convert-your-python-projects-to-exe",
+    proofTagline: "Review from Fiverr; Click to see the proof",
+    featured: ["Went above and beyond", "Code expertise"],
   },
   {
     name: "MahmoudSuprime",
@@ -76,15 +76,15 @@ const reviews = [
 export default function ProofingSection() {
   return (
     <section className="flex flex-col justify-between px-8 md:px-28 bg-surface">
-      <h2 className="text-4xl mx-auto sm:text-6xl font-extrabold pt-18 pb-14 tracking-tighter text-foreground font-sans">
+      <h2 className="text-5xl mx-auto sm:text-6xl font-extrabold pt-18 pb-14 tracking-tighter text-foreground font-sans">
         3+ Years Of Building Software
       </h2>
 
       <div className="pb-6">
-        <p className="font-semibold font-sans text-4xl">
+        <p className="font-semibold font-sans text-4xl mb-2 sm:mb-0">
           Reviews From My Clients:
         </p>
-        <p className="text-muted text-xs">DISCLAIMER: Exact wording may differ slightly, except in meaning. Some reviews are from my WhatsApp Business and cannot be verified directly. Updated weekly.</p>
+        <p className="hidden sm:block text-muted text-sm sm:text-xs">Exact wording may differ slightly due to language differences, except in meaning.</p>
       </div>
 
       <motion.div
@@ -133,11 +133,11 @@ export default function ProofingSection() {
             <p className="text-lg">&quot;{review.text}&quot;</p>
             {review.featured.length > 0 && (
               <div className="flex flex-col gap-1">
-                <span className="text-md font-bold text-muted">Featured:</span>
+                {/* <span className="text-md font-bold text-muted">Featured:</span> */}
                 {review.featured.map((tag, idx) => (
                   <div
                     key={idx}
-                    className="bg-surface text-sm rounded-xl -ml-1 mr-auto px-2 py-1"
+                    className="bg-surface text-xs rounded-xl -ml-1 mr-auto px-2.5 py-1.5"
                   >
                     {tag}
                   </div>
