@@ -17,9 +17,9 @@ export default function IntroSection() {
     if (!el) return;
     const { left, top, width, height } = el.getBoundingClientRect();
 
-    const magnetDistance = 0.02;
-    x.set((e.clientX - (left + width / 2)) * magnetDistance);
-    y.set((e.clientY - (top + height / 2)) * magnetDistance);
+    const maxMove = 4;
+    x.set(((e.clientX - (left + width / 2)) / (width / 2)) * maxMove);
+    y.set(((e.clientY - (top + height / 2)) / (height / 2)) * maxMove);
   }
 
   function onMouseLeave() {
@@ -39,7 +39,7 @@ export default function IntroSection() {
           className="hidden lg:block shrink-0 lg:h-100 lg:w-100 grayscale mb-18"
         />
         <div className="flex flex-col gap-8 sm:gap-12">
-          <h1 className="text-foreground flex flex-col">
+          <h1 className="text-foreground flex flex-col cursor-default">
             <div className="flex flex-col sm:flex-row sm:gap-3 z-1 tracking-tighter text-6xl sm:text-7xl font-semibold">
               <span className="leading-[0.9] sm:leading-none">Building</span>
               <span className="leading-[0.9] sm:leading-none">Software</span>
@@ -54,7 +54,7 @@ export default function IntroSection() {
               </span>
               <Link
                 href="#"
-                className="text-muted text-sm font-normal mb-1 mt-auto sm:mb-0 sm:mt-1 hover:text-foreground hover:underline underline-offset-4"
+                className="text-muted text-sm font-normal mb-1 mt-auto sm:mb-0 sm:mt-1 hover:text-foreground hover:underline underline-offset-4 cursor-pointer"
               >
                 See How?
               </Link>
@@ -66,7 +66,7 @@ export default function IntroSection() {
               style={{ x: springX, y: springY }}
               onMouseMove={onMouseMove}
               onMouseLeave={onMouseLeave}
-              className="group bg-accent text-surface py-8 sm:py-6 rounded-3xl text-[33px] sm:text-4xl font-sans font-extrabold flex flex-row items-center justify-center gap-2 hover:bg-accent-hover w-full"
+              className="group bg-accent text-surface py-8 sm:py-6 rounded-3xl text-[33px] sm:text-4xl font-sans font-extrabold flex flex-row items-center justify-center gap-2 hover:bg-accent-hover w-full cursor-pointer"
             >
               Click to Begin
               <svg
@@ -93,7 +93,7 @@ export default function IntroSection() {
         </div>
       </div>
       <div
-        className="absolute bottom-5 flex flex-col items-center text-muted cursor-default"
+        className="absolute bottom-5 sm:bottom-7 flex flex-col items-center text-muted cursor-default"
       >
         <span className="text-sm tracking-wider uppercase">Scroll</span>
         <svg

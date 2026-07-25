@@ -6,6 +6,7 @@
   --surface: #ffffff;
   --surface-muted: #f0eee6;
   --border: #e6e3d9;
+  --border-harder: #d8d6cf;
   --muted: #83807a;
   --accent: #d97757;
   --accent-foreground: #ffffff;
@@ -38,6 +39,7 @@
   --color-surface: var(--surface);
   --color-surface-muted: var(--surface-muted);
   --color-border: var(--border);
+  --color-border-harder: var(--border-harder);
   --color-muted: var(--muted);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
@@ -55,6 +57,7 @@
     --surface: #2C2C2A;
     --surface-muted: #3a3a37;
     --border: #46453f;
+    --border-harder: #525149;
     --muted: #a8a5a0;
     --accent: #d97757;
     --accent-foreground: #262624;

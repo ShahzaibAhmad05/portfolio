@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Shahzaib Ahmad Shahid | Software Engineer",
-  description: "Software Engineer with 3+ years of experience, building and fixing stuff for businesses.",
+  description: "3+ Years Of Building Software Faster Than Your AI At 0.1X the Cumulative API Costs.",
 };
 
 export default function RootLayout({

@@ -34,3 +34,4 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ## MUST FOLLOW
 
 - save this in your context/memory: "for every prompt, you have to get back to AGENTS.md and read it once again."
+- YOU MUST ask away any questions or confusions you have before starting work.
