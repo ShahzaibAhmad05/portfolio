@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import IntroSection from "./IntroSection";
 import ProofingSection from "./ProofingSection";
 
@@ -9,8 +9,6 @@ const DAMPEN = 0.28;
 const SNAPINESS = 0.15;
 
 export default function Home() {
-  const [proofReady, setProofReady] = useState(false);
-
   useEffect(() => {
     window.history.scrollRestoration = "manual";
     window.scrollTo(0, 0);
@@ -44,20 +42,21 @@ export default function Home() {
       if (!raf) raf = requestAnimationFrame(tick);
     }
 
-    function onWheel(e: WheelEvent) {
-      if (window.scrollY >= window.innerHeight - 1) return;
+    function shouldTakeOver() {
+      return window.scrollY < window.innerHeight - 1;
+    }
 
-      e.preventDefault();
+    function handleDelta(deltaY: number) {
       if (animatingFull) {
         const movingDown = target > current;
-        if ((movingDown && e.deltaY < 0) || (!movingDown && e.deltaY > 0)) {
+        if ((movingDown && deltaY < 0) || (!movingDown && deltaY > 0)) {
           target = movingDown ? 0 : window.innerHeight;
         }
         return;
       }
       current = window.scrollY;
 
-      acc += e.deltaY;
+      acc += deltaY;
       window.clearTimeout(accTimer);
       accTimer = window.setTimeout(() => {
         acc = 0;
@@ -73,18 +72,42 @@ export default function Home() {
         const index = Math.round(current / window.innerHeight);
         const next = index + dir;
         target = clamp(next * window.innerHeight);
-        if (next === 1) setProofReady(true);
         startTick();
         return;
       }
 
-      target = clamp(target + e.deltaY * DAMPEN);
+      target = clamp(target + deltaY * DAMPEN);
       startTick();
     }
 
+    function onWheel(e: WheelEvent) {
+      if (!shouldTakeOver()) return;
+      e.preventDefault();
+      handleDelta(e.deltaY);
+    }
+
+    let touchY = 0;
+
+    function onTouchStart(e: TouchEvent) {
+      touchY = e.touches[0].clientY;
+    }
+
+    function onTouchMove(e: TouchEvent) {
+      if (!shouldTakeOver()) return;
+      e.preventDefault();
+      const newY = e.touches[0].clientY;
+      const deltaY = touchY - newY;
+      touchY = newY;
+      handleDelta(deltaY * 2.5);
+    }
+
     window.addEventListener("wheel", onWheel, { passive: false });
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
     return () => {
       window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
       window.clearTimeout(accTimer);
       if (raf) cancelAnimationFrame(raf);
     };
@@ -93,7 +116,7 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       <IntroSection />
-      <ProofingSection ready={proofReady} />
+      <ProofingSection />
     </div>
   );
 }

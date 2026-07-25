@@ -73,7 +73,7 @@ const reviews = [
   },
 ];
 
-export default function ProofingSection({ ready }: { ready: boolean }) {
+export default function ProofingSection() {
   return (
     <section className="flex flex-col justify-between px-8 md:px-28 bg-surface">
       <h2 className="text-4xl mx-auto sm:text-6xl font-extrabold pt-18 pb-14 tracking-tighter text-foreground font-sans">
@@ -89,8 +89,9 @@ export default function ProofingSection({ ready }: { ready: boolean }) {
 
       <motion.div
         initial={{ opacity: 0, y: 24 }}
-        animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
-        transition={{ duration: 0.7, delay: 0.15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.7 }}
         className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-3"
       >
         {reviews.map((review, idx) => (
@@ -152,8 +153,9 @@ export default function ProofingSection({ ready }: { ready: boolean }) {
       <hr className="border-border-harder my-18" />
       <motion.div
         initial={{ opacity: 0, y: 24 }}
-        animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
-        transition={{ duration: 0.7, delay: 0.3 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.6 }}
+        transition={{ duration: 0.7 }}
         className="flex flex-row items-center justify-center gap-4 text-xl sm:text-4xl lg:text-6xl font-bold font-sans tracking-tight text-foreground"
       >
         <p>Check My Profile On</p>
