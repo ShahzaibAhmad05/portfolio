@@ -29,7 +29,7 @@ export default function IntroSection() {
 
   return (
     <section className="relative flex flex-col h-svh items-center justify-center">
-      <div className="flex flex-row items-center justify-center gap-6">
+      <div className="flex flex-row items-center justify-center gap-6 mb-5 sm:mb-0">
         <Image
           src="/pfp.png"
           alt="Profile photo"
@@ -38,19 +38,23 @@ export default function IntroSection() {
           priority
           className="hidden lg:block shrink-0 lg:h-100 lg:w-100 grayscale mb-18"
         />
-        <div className="flex flex-col gap-12">
-          <h1 className="text-4xl sm:text-7xl font-semibold text-foreground flex flex-col">
-            <span className="z-1 tracking-tighter">Building Software</span>
-            <span className="sm:text-8xl text-accent uppercase font-extrabold -mt-5 tracking-tighter">
-              3X Faster
-            </span>
+        <div className="flex flex-col gap-8 sm:gap-12">
+          <h1 className="text-foreground flex flex-col">
+            <div className="flex flex-col sm:flex-row sm:gap-3 z-1 tracking-tighter text-6xl sm:text-7xl font-semibold">
+              <span className="leading-[0.9] sm:leading-none">Building</span>
+              <span className="leading-[0.9] sm:leading-none">Software</span>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:gap-3 text-[80px] leading-none sm:text-8xl text-accent uppercase font-extrabold -mt-1 sm:-mt-5 tracking-tighter">
+              <span className="leading-[0.8] sm:leading-none">3X</span>
+              <span className="leading-[0.8] sm:leading-none">Faster</span>
+            </div>
             <div className="flex flex-row gap-1">
-              <span className="text-5xl tracking-tight -mt-5 z-1">
+              <span className="text-5xl sm:text-5xl tracking-tight sm:-mt-5 z-1 font-semibold">
                 than your AI
               </span>
               <Link
                 href="#"
-                className="text-muted text-sm font-normal mt-1 hover:text-foreground hover:underline underline-offset-4"
+                className="text-muted text-sm font-normal mb-1 mt-auto sm:mb-0 sm:mt-1 hover:text-foreground hover:underline underline-offset-4"
               >
                 See How?
               </Link>
@@ -62,7 +66,7 @@ export default function IntroSection() {
               style={{ x: springX, y: springY }}
               onMouseMove={onMouseMove}
               onMouseLeave={onMouseLeave}
-              className="group bg-accent text-surface py-6 rounded-3xl text-4xl font-sans font-extrabold flex flex-row items-center justify-center gap-2 hover:bg-accent-hover w-full"
+              className="group bg-accent text-surface py-8 sm:py-6 rounded-3xl text-[33px] sm:text-4xl font-sans font-extrabold flex flex-row items-center justify-center gap-2 hover:bg-accent-hover w-full"
             >
               Click to Begin
               <svg
