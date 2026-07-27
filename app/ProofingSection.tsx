@@ -36,7 +36,7 @@ const reviews = [
     featured: ["Delivery time", "Quick responsiveness"],
   },
   {
-    name: "JohnLuther",
+    name: "Anonymous",
     location: "India",
     text: "Good work",
     details: "Fixed issues with selenium chrome drivers and gmail api.",
@@ -63,7 +63,7 @@ const reviews = [
     featured: [],
   },
   {
-    name: "mrichardson",
+    name: "Anonymous",
     location: "United States",
     text: "very knowledgeable",
     details: "Resolved packaging errors in their PyInstaller build pipeline.",
@@ -84,7 +84,7 @@ export default function ProofingSection() {
         <p className="font-semibold font-sans text-4xl mb-2 sm:mb-0">
           Reviews From My Clients:
         </p>
-        <p className="hidden sm:block text-muted text-sm sm:text-xs">Exact wording may differ slightly due to language differences, except in meaning.</p>
+        <p className="hidden sm:block text-muted text-sm sm:text-xs">Usernames of clients are put here exactly as they are on source platforms, omitting digits.</p>
       </div>
 
       <motion.div
