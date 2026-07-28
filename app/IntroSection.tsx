@@ -38,27 +38,25 @@ export default function IntroSection() {
           priority
           className="hidden lg:block shrink-0 lg:h-100 lg:w-100 grayscale mb-18"
         />
-        <div className="flex flex-col gap-8 sm:gap-12">
-          <h1 className="text-foreground flex flex-col cursor-default">
-            <div className="flex flex-col sm:flex-row sm:gap-3 z-1 tracking-tighter text-6xl sm:text-7xl font-semibold">
+        <div className="flex flex-col gap-8 sm:gap-10">
+          <h1 className="text-foreground flex flex-col cursor-default font-sans">
+            <div className="flex flex-col sm:flex-row sm:gap-3 z-1 tracking-tighter text-6xl sm:text-6xl font-extrabold">
               <span className="leading-[0.9] sm:leading-none">Building</span>
               <span className="leading-[0.9] sm:leading-none">Software</span>
             </div>
-            <div className="flex flex-col sm:flex-row sm:gap-3 text-[80px] leading-none sm:text-8xl text-accent uppercase font-extrabold -mt-1 sm:-mt-5 tracking-tighter">
+            <div className="flex flex-col sm:flex-row sm:gap-3 text-[80px] leading-none sm:text-8xl text-accent uppercase font-extrabold sm:-mt-4 tracking-tighter">
               <span className="leading-[0.8] sm:leading-none">3X</span>
               <span className="leading-[0.8] sm:leading-none">Faster</span>
             </div>
-            <div className="flex flex-row gap-1">
-              <span className="text-5xl sm:text-5xl tracking-tight sm:-mt-5 z-1 font-semibold">
-                than your AI
-              </span>
-              <Link
-                href="#"
-                className="text-muted text-sm font-normal mb-1 mt-auto sm:mb-0 sm:mt-1 hover:text-foreground hover:underline underline-offset-4 cursor-pointer"
-              >
-                See How?
-              </Link>
-            </div>
+            <span className="text-5xl sm:text-6xl tracking-tight -mt-1 sm:-mt-6 z-1 font-extrabold">
+              than your AI
+            </span>
+            <Link
+              href="#"
+              className="text-muted text-sm font-normal hover:text-foreground hover:underline underline-offset-4 cursor-pointer ml-1 sm:-mt-1"
+            >
+              Want to know How?
+            </Link>
           </h1>
           <div className="flex flex-col items-center gap-1">
             <motion.button
@@ -66,7 +64,7 @@ export default function IntroSection() {
               style={{ x: springX, y: springY }}
               onMouseMove={onMouseMove}
               onMouseLeave={onMouseLeave}
-              className="group bg-accent text-surface py-8 sm:py-6 rounded-3xl text-[33px] sm:text-4xl font-sans font-extrabold flex flex-row items-center justify-center gap-2 hover:bg-accent-hover w-full cursor-pointer"
+              className="group bg-accent text-surface py-6 sm:py-6 rounded-3xl text-[33px] sm:text-4xl font-sans font-extrabold flex flex-row items-center justify-center gap-2 hover:bg-accent-hover w-full cursor-pointer px-7"
             >
               Click to Begin
               <svg
