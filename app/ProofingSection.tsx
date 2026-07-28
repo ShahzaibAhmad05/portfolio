@@ -84,7 +84,7 @@ export default function ProofingSection() {
         <p className="font-semibold font-sans text-4xl mb-2 sm:mb-0">
           Reviews From My Clients:
         </p>
-        <p className="hidden sm:block text-muted text-sm sm:text-xs">Usernames of clients are put here exactly as they are on source platforms, omitting digits.</p>
+        <p className="text-muted text-sm sm:text-xs">Usernames of clients are put here exactly as they are on source platforms, omitting digits.</p>
       </div>
 
       <motion.div
@@ -100,7 +100,8 @@ export default function ProofingSection() {
             href={review.proof}
             title={review.proofTagline}
             className={
-              "mb-3 flex flex-col gap-3 rounded-lg bg-surface-muted border-2 border-transparent p-4 break-inside-avoid" +
+              (idx >= 3 ? "hidden sm:flex " : "flex ") +
+              "mb-3 flex-col gap-3 rounded-lg bg-surface-muted border-2 border-transparent p-4 break-inside-avoid" +
               (review.proof ? " hover:border-border" : " cursor-default")
             }
           >
@@ -156,7 +157,7 @@ export default function ProofingSection() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.6 }}
         transition={{ duration: 0.7 }}
-        className="flex flex-row items-center justify-center gap-4 text-xl sm:text-4xl lg:text-6xl font-bold font-sans tracking-tight text-foreground"
+        className="flex flex-row items-center justify-center gap-4 text-xl sm:text-4xl lg:text-6xl font-bold font-sans tracking-tight text-foreground cursor-default"
       >
         <p>Check My Profile On</p>
         <Link

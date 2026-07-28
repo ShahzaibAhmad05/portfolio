@@ -3,6 +3,8 @@
 import { useEffect } from "react";
 import IntroSection from "./IntroSection";
 import ProofingSection from "./ProofingSection";
+import ServicesSection from "./ServicesSection";
+import Footer from "./Footer";
 
 const PUSH_THRESHOLD = 60; // total delta needed to trigger a full section snap
 const SENSITIVITY = 0.28; // how much a small scroll actually moves the target
@@ -143,6 +145,8 @@ export default function Home() {
     <div className="flex flex-col">
       <IntroSection />
       <ProofingSection />
+      <ServicesSection />
+      <Footer />
     </div>
   );
 }
