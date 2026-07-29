@@ -9,7 +9,7 @@ const services = [
   "Code to Exe",
   "Browser Extensions",
   "AI Automation",
-  "Computer Vision",
+  "Computer Vision / OpenCV",
 ];
 
 export default function ServicesSection() {
@@ -24,7 +24,7 @@ export default function ServicesSection() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.7 }}
-        className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-24"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-3"
       >
         {services.map((service) => (
           <Link
@@ -37,23 +37,27 @@ export default function ServicesSection() {
           </Link>
         ))}
       </motion.div>
+      <hr className="border-border-harder my-18" />
 
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.6 }}
         transition={{ duration: 0.7 }}
-        className="flex flex-col sm:flex-row sm:justify-between items-center gap-4 pb-24"
+        className="flex flex-col sm:flex-row sm:justify-between items-center gap-4 pb-18"
       >
-        <p className="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-sans tracking-tighter text-foreground cursor-default">
+        <p className="text-4xl sm:text-5xl lg:text-7xl font-extrabold font-sans tracking-tighter text-foreground cursor-default">
           Still Confused?
         </p>
-        <Link
-          href="#"
-          className="bg-accent text-surface py-5 sm:py-6 rounded-3xl text-[26px] sm:text-4xl font-sans font-extrabold hover:bg-accent-hover px-10 sm:px-10 text-center"
-        >
-          Discuss for FREE
-        </Link>
+        <div className="flex flex-col gap-1">
+          <Link
+            href="#"
+            className="bg-accent text-surface py-5 sm:py-6 rounded-3xl text-[26px] sm:text-4xl font-sans font-extrabold hover:bg-accent-hover px-10 sm:px-10 text-center"
+          >
+            Discuss for FREE
+          </Link>
+          <p className="text-sm text-muted mx-auto">I don&apos;t mind a friendly chat :)</p>
+        </div>
       </motion.div>
     </section>
   );
