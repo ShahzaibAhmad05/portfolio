@@ -8,26 +8,31 @@ export const metadata: Metadata = {
 
 export default function SecretDashboardSignIn() {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center px-6 py-16">
-      <div className="flex w-full max-w-sm flex-col items-center gap-8">
-        <div className="flex flex-col items-center gap-3 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-            Secret Dashboard
-          </h1>
-          <p className="text-sm text-muted sm:text-base">
-            Sign in with Google to continue.
-          </p>
-        </div>
+    <div className="flex h-svh flex-col items-center justify-center px-6 py-16">
+      <div className="flex flex-col items-center justify-center gap-8">
+        <h1 className="absolute -z-1 text-6xl font-extrabold tracking-tighter text-accent font-sans lg:text-[220px]">
+          Warning!
+        </h1>
 
-        <div className="w-full rounded-3xl border border-border bg-surface p-6 shadow-lg shadow-black/3 sm:p-8">
+        <div className="flex flex-col gap-3 items-center justify-center bg-background/95 rounded-xl p-6">
+          <p className="text-lg font-semibold -mt-4 z-1">
+            return to the{' '}
+            <Link
+              href="/"
+              className="text-accent hover:underline underline-offset-4 hover:text-accent-hover"
+            >
+              Homepage
+            </Link>
+            {' '}if you are not the admin
+          </p>
           <Link
             href="/secret-dashboard/app"
-            className="flex h-12 w-full items-center justify-center gap-3 rounded-full border border-border bg-surface-muted text-sm font-medium text-foreground transition-opacity hover:opacity-90"
+            className="flex flex-row items-center justify-center gap-3 rounded-xl px-5 py-1.5 border-2 border-transparent hover:border-border bg-surface-muted text-lg text-foreground"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
-              className="h-5 w-5"
+              className="h-7 w-7"
               aria-hidden
             >
               <path
@@ -47,11 +52,8 @@ export default function SecretDashboardSignIn() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            Sign in with Google
+            Verify
           </Link>
-          <p className="mt-4 text-center text-xs text-muted">
-            Placeholder — OAuth not wired up yet.
-          </p>
         </div>
       </div>
     </div>

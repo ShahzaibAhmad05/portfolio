@@ -11,6 +11,7 @@
   --accent: #d97757;
   --accent-foreground: #ffffff;
   --accent-hover: #c96747;
+  --error: #ff0000;
 }
 
 @keyframes nudge-x {
@@ -44,6 +45,7 @@
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-foreground: var(--accent-foreground);
+  --color-error: var(--error);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --animate-nudge-x: nudge-x 1s ease-in-out infinite;
@@ -62,6 +64,7 @@
     --accent: #d97757;
     --accent-foreground: #262624;
     --accent-hover: #cd6e4f;
+    --error: #dc0000;
   }
 }
 
