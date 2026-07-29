@@ -4,8 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 export default function IntroSection() {
+  const router = useRouter();
+
   const ref = useRef<HTMLButtonElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -52,7 +55,7 @@ export default function IntroSection() {
               than your AI
             </span>
             <Link
-              href="#"
+              href="/chat"
               className="text-muted text-sm font-normal hover:text-foreground hover:underline underline-offset-4 cursor-pointer ml-1 sm:-mt-1"
             >
               Want to know How?
@@ -61,6 +64,7 @@ export default function IntroSection() {
           <div className="flex flex-col items-center gap-1">
             <motion.button
               ref={ref}
+              onClick={() => router.push("/chat")}
               style={{ x: springX, y: springY }}
               onMouseMove={onMouseMove}
               onMouseLeave={onMouseLeave}
