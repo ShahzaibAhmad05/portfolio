@@ -70,7 +70,7 @@ export default function IntroSection() {
               onMouseLeave={onMouseLeave}
               className="group bg-accent text-surface py-6 sm:py-6 rounded-3xl text-[33px] sm:text-4xl font-sans font-extrabold flex flex-row items-center justify-center gap-2 hover:bg-accent-hover w-full cursor-pointer px-7"
             >
-              Click to Chat
+              Enter Chat
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
