@@ -21,3 +21,7 @@ For adding new admins, open the `admins` table in the db and manually add the em
 ## Chats
 
 There's some `<Suspense />` we added which is needed for the `useSearchParams()` to work. 
+
+## Admin Dashboard
+
+Is able to browse all chats and respond to all incoming messages.
