@@ -86,7 +86,7 @@ export default function IntroSection() {
               </svg>
             </motion.button>
             <Link
-              href="#"
+              href="/chat"
               className="text-muted text-sm hover:text-foreground hover:underline underline-offset-4 ml-5 mr-auto"
             >
               Already been here?

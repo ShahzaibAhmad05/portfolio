@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import IntroSection from "./IntroSection";
 import ProofingSection from "./ProofingSection";
 import ServicesSection from "./ServicesSection";
@@ -12,6 +13,12 @@ const SNAPINESS = 0.25; // how fast current catches up to target each frame
 const IDLE_DELAY = 100; // ms of no input before snapping to nearest section
 
 export default function Home() {
+  const router = useRouter();
+
+  useEffect(() => {
+    if (localStorage.getItem("chat_id")) router.push("/chat");
+  }, [router]);
+
   useEffect(() => {
     window.history.scrollRestoration = "manual";
     window.scrollTo(0, 0);
