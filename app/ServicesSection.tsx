@@ -4,12 +4,12 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 
 const services = [
-  "SaaS",
-  "Python Tkinter / PyQt6 Apps",
-  "Code to Exe",
-  "Browser Extensions",
-  "AI Automation",
-  "Computer Vision / OpenCV",
+  { label: "SaaS", code: "saas" },
+  { label: "Python Tkinter / PyQt6 Apps", code: "tkinter" },
+  { label: "Code to Exe", code: "exe" },
+  { label: "Browser Extensions", code: "extensions" },
+  { label: "AI Automation", code: "ai" },
+  { label: "Computer Vision / OpenCV", code: "cv" },
 ];
 
 export default function ServicesSection() {
@@ -28,12 +28,12 @@ export default function ServicesSection() {
       >
         {services.map((service) => (
           <Link
-            href="#"
-            key={service}
+            href={`/chat?c=${service.code}`}
+            key={service.code}
             title="Click to chat on this service :)"
             className="rounded-lg bg-surface-muted px-5 py-4 text-xl sm:text-2xl font-semibold font-sans tracking-tight hover:bg-surface cursor-pointer"
           >
-            {service}
+            {service.label}
           </Link>
         ))}
       </motion.div>
@@ -51,7 +51,7 @@ export default function ServicesSection() {
         </p>
         <div className="flex flex-col gap-1">
           <Link
-            href="#"
+            href="/chat?c=discuss"
             className="bg-accent text-surface py-5 sm:py-6 rounded-3xl text-[26px] sm:text-4xl font-sans font-extrabold hover:bg-accent-hover px-10 sm:px-10 text-center"
           >
             Discuss for FREE

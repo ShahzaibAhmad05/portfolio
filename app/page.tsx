@@ -6,6 +6,7 @@ import IntroSection from "./IntroSection";
 import ProofingSection from "./ProofingSection";
 import ServicesSection from "./ServicesSection";
 import Footer from "./Footer";
+import { trackVisitor } from "@/lib/stats";
 
 const PUSH_THRESHOLD = 60; // total delta needed to trigger a full section snap
 const SENSITIVITY = 0.28; // how much a small scroll actually moves the target
@@ -16,6 +17,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
+    trackVisitor();
     if (localStorage.getItem("chat_id")) router.push("/chat");
   }, [router]);
 

@@ -55,7 +55,7 @@ export default function IntroSection() {
               than your AI
             </span>
             <Link
-              href="/chat"
+              href="/chat?c=how"
               className="text-muted text-sm font-normal hover:text-foreground hover:underline underline-offset-4 cursor-pointer ml-1 sm:-mt-1"
             >
               Want to know How?
@@ -64,7 +64,7 @@ export default function IntroSection() {
           <div className="flex flex-col items-center gap-1">
             <motion.button
               ref={ref}
-              onClick={() => router.push("/chat")}
+              onClick={() => router.push("/chat?c=enter")}
               style={{ x: springX, y: springY }}
               onMouseMove={onMouseMove}
               onMouseLeave={onMouseLeave}
