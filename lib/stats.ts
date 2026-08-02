@@ -15,7 +15,16 @@ export const BUTTON_LABELS: Record<string, string> = {
   extensions: "Browser Extensions",
   ai: "AI Automation",
   cv: "Computer Vision / OpenCV",
+  returning: "Returning visitor",
 };
+
+export function monthStart(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
+}
+
+export function prevMonthStart(d = new Date()) {
+  return monthStart(new Date(d.getFullYear(), d.getMonth() - 1, 1));
+}
 
 export async function trackVisitor() {
   const today = todayDate();

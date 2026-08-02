@@ -26,6 +26,32 @@ export async function bumpChatUpdatedAt(
     .eq("id", chatId);
 }
 
+export async function bumpChatUploads(
+  supabase: SupabaseClient,
+  chatId: string,
+  size: number,
+) {
+  const { data } = await supabase
+    .from("chats")
+    .select("current_uploads")
+    .eq("id", chatId)
+    .maybeSingle();
+  const current = Number(data?.current_uploads ?? 0);
+  await supabase
+    .from("chats")
+    .update({ current_uploads: current + size })
+    .eq("id", chatId);
+  return current + size;
+}
+
+export function isTabFocused() {
+  return (
+    typeof document !== "undefined" &&
+    document.visibilityState === "visible" &&
+    document.hasFocus()
+  );
+}
+
 export async function markMessagesRead(
   supabase: SupabaseClient,
   chatId: string,
@@ -37,4 +63,42 @@ export async function markMessagesRead(
     .eq("chat_id", chatId)
     .eq("sender", sender)
     .is("read_at", null);
+}
+
+export async function markMessagesReadIfFocused(
+  supabase: SupabaseClient,
+  chatId: string,
+  sender: "client" | "me",
+) {
+  if (!isTabFocused()) return;
+  await markMessagesRead(supabase, chatId, sender);
+}
+
+/** content = typed text; translated = optional target-language text. Fail-open. */
+export async function prepareTranslatedMessage(
+  text: string,
+  language: string | null | undefined,
+  target: "en" | string,
+) {
+  if (!language) {
+    return { content: text, translated: null as string | null };
+  }
+
+  try {
+    const res = await fetch("/api/translate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, to: target }),
+    });
+    if (!res.ok) {
+      return { content: text, translated: null as string | null };
+    }
+    const json = (await res.json()) as { text?: string };
+    if (!json.text) {
+      return { content: text, translated: null as string | null };
+    }
+    return { content: text, translated: json.text };
+  } catch {
+    return { content: text, translated: null as string | null };
+  }
 }

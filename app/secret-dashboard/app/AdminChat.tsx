@@ -3,9 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { RealtimeChannel } from "@supabase/supabase-js";
-import { bumpChatUpdatedAt, markMessagesRead } from "@/lib/chat";
+import {
+  bumpChatUpdatedAt,
+  bumpChatUploads,
+  markMessagesReadIfFocused,
+  prepareTranslatedMessage,
+} from "@/lib/chat";
+import { formatBytes, uploadAttachment } from "@/lib/attachments";
 import ChatStatusPanel from "@/app/ChatStatusPanel";
-import ReadTicks from "@/app/ReadTicks";
+import ChatThread, { type ChatMessage } from "@/app/ChatThread";
 
 type Chat = {
   id: string;
@@ -13,15 +19,12 @@ type Chat = {
   time_remaining: string | null;
   updated_at: string | null;
   not_a_client: boolean;
-};
-
-type Message = {
-  id: number;
-  sender: "client" | "me";
-  content: string;
-  created_at: string;
-  read_at: string | null;
-  chat_id?: string;
+  estimated_budget: number | null;
+  email: string | null;
+  nickname: string | null;
+  language: string | null;
+  current_uploads: number;
+  max_uploads: number;
 };
 
 function sortChats(list: Chat[]) {
@@ -39,10 +42,32 @@ function toDatetimeLocal(value: string | null) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+function normalizeChat(row: Chat): Chat {
+  return {
+    ...row,
+    estimated_budget:
+      row.estimated_budget == null ? null : Number(row.estimated_budget),
+    nickname: row.nickname ?? null,
+    language: row.language ?? null,
+    current_uploads: Number(row.current_uploads ?? 0),
+    max_uploads: Number(row.max_uploads ?? 524288000),
+  };
+}
+
+function bytesToMbInput(bytes: number) {
+  return String(bytes / (1024 * 1024));
+}
+
+function mbInputToBytes(value: string) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) return null;
+  return Math.round(n * 1024 * 1024);
+}
+
 export default function AdminChat() {
   const [chats, setChats] = useState<Chat[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [unread, setUnread] = useState<Record<string, number>>({});
   const [adminStatusDraft, setAdminStatusDraft] = useState("");
@@ -51,16 +76,69 @@ export default function AdminChat() {
   >(null);
   const [chatStatusDraft, setChatStatusDraft] = useState("");
   const [chatTimeDraft, setChatTimeDraft] = useState("");
+  const [budgetDraft, setBudgetDraft] = useState("");
+  const [nicknameDraft, setNicknameDraft] = useState("");
+  const [languageDraft, setLanguageDraft] = useState("");
+  const [maxUploadsDraft, setMaxUploadsDraft] = useState("");
+  const [isOtherTyping, setIsOtherTyping] = useState(false);
   const channelRef = useRef<RealtimeChannel | null>(null);
   const chatsChannelRef = useRef<RealtimeChannel | null>(null);
   const unreadChannelRef = useRef<RealtimeChannel | null>(null);
   const activeIdRef = useRef<string | null>(null);
+  const languageRef = useRef<string | null>(null);
+  const typingIdleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const typingClearRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const typingDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const activeChat = chats.find((c) => c.id === activeId) ?? null;
+
+  function applyChatDrafts(chat: Chat | null | undefined) {
+    setChatStatusDraft(chat?.status ?? "");
+    setChatTimeDraft(toDatetimeLocal(chat?.time_remaining ?? null));
+    setBudgetDraft(
+      chat?.estimated_budget == null ? "" : String(chat.estimated_budget),
+    );
+    setNicknameDraft(chat?.nickname ?? "");
+    setLanguageDraft(chat?.language ?? "");
+    setMaxUploadsDraft(
+      chat ? bytesToMbInput(chat.max_uploads) : "",
+    );
+    languageRef.current = chat?.language ?? null;
+  }
 
   useEffect(() => {
     activeIdRef.current = activeId;
   }, [activeId]);
+
+  useEffect(() => {
+    languageRef.current = activeChat?.language ?? null;
+  }, [activeChat?.language]);
+
+  function broadcastTyping(typing: boolean) {
+    const channel = channelRef.current;
+    if (!channel) return;
+    void channel.send({
+      type: "broadcast",
+      event: "typing",
+      payload: { sender: "me", typing },
+    });
+  }
+
+  function handleDraftChange(value: string) {
+    setDraft(value);
+    if (!activeIdRef.current) return;
+
+    if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
+    typingDebounceRef.current = setTimeout(() => {
+      if (!value.trim()) {
+        broadcastTyping(false);
+        return;
+      }
+      broadcastTyping(true);
+      if (typingIdleRef.current) clearTimeout(typingIdleRef.current);
+      typingIdleRef.current = setTimeout(() => broadcastTyping(false), 1500);
+    }, 300);
+  }
 
   useEffect(() => {
     const supabase = createClient();
@@ -78,16 +156,17 @@ export default function AdminChat() {
 
     supabase
       .from("chats")
-      .select("id, status, time_remaining, updated_at, not_a_client")
+      .select(
+        "id, status, time_remaining, updated_at, not_a_client, estimated_budget, email, nickname, language, current_uploads, max_uploads",
+      )
       .order("updated_at", { ascending: false })
       .then(({ data }) => {
         if (!data) return;
-        const sorted = sortChats(data);
+        const sorted = sortChats(data.map((c) => normalizeChat(c as Chat)));
         setChats(sorted);
         if (sorted[0]) {
           setActiveId(sorted[0].id);
-          setChatStatusDraft(sorted[0].status ?? "");
-          setChatTimeDraft(toDatetimeLocal(sorted[0].time_remaining));
+          applyChatDrafts(sorted[0]);
         }
       });
 
@@ -112,7 +191,7 @@ export default function AdminChat() {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "chats" },
         (payload) => {
-          const row = payload.new as Chat;
+          const row = normalizeChat(payload.new as Chat);
           setChats((prev) =>
             sortChats([row, ...prev.filter((c) => c.id !== row.id)]),
           );
@@ -122,12 +201,15 @@ export default function AdminChat() {
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "chats" },
         (payload) => {
-          const row = payload.new as Chat;
+          const row = normalizeChat(payload.new as Chat);
           setChats((prev) =>
             sortChats(
               prev.map((c) => (c.id === row.id ? { ...c, ...row } : c)),
             ),
           );
+          if (row.id === activeIdRef.current) {
+            languageRef.current = row.language;
+          }
         },
       )
       .on(
@@ -142,8 +224,7 @@ export default function AdminChat() {
               setActiveId(fallback?.id ?? null);
               setMessages([]);
               setDraft("");
-              setChatStatusDraft(fallback?.status ?? "");
-              setChatTimeDraft(toDatetimeLocal(fallback?.time_remaining ?? null));
+              applyChatDrafts(fallback);
             }
             return next;
           });
@@ -162,10 +243,10 @@ export default function AdminChat() {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages" },
         (payload) => {
-          const row = payload.new as Message & { chat_id: string };
+          const row = payload.new as ChatMessage & { chat_id: string };
           if (row.sender !== "client") return;
           if (row.chat_id === activeIdRef.current) {
-            markMessagesRead(supabase, row.chat_id, "client");
+            markMessagesReadIfFocused(supabase, row.chat_id, "client");
             return;
           }
           setUnread((prev) => ({
@@ -198,7 +279,7 @@ export default function AdminChat() {
     }
 
     async function load() {
-      await markMessagesRead(supabase, activeId!, "client");
+      await markMessagesReadIfFocused(supabase, activeId!, "client");
       setUnread((prev) => {
         const next = { ...prev };
         delete next[activeId!];
@@ -213,8 +294,11 @@ export default function AdminChat() {
       if (!cancelled && data) setMessages(data);
       if (cancelled) return;
 
+      // Same topic as client chat so typing broadcast is shared.
       channelRef.current = supabase
-        .channel(`admin-messages-${activeId}`)
+        .channel(`messages-${activeId}`, {
+          config: { broadcast: { self: false } },
+        })
         .on(
           "postgres_changes",
           {
@@ -224,10 +308,10 @@ export default function AdminChat() {
             filter: `chat_id=eq.${activeId}`,
           },
           (payload) => {
-            const row = payload.new as Message;
+            const row = payload.new as ChatMessage;
             setMessages((prev) => [...prev, row]);
             if (row.sender === "client") {
-              markMessagesRead(supabase, activeId!, "client");
+              markMessagesReadIfFocused(supabase, activeId!, "client");
             }
           },
         )
@@ -240,12 +324,26 @@ export default function AdminChat() {
             filter: `chat_id=eq.${activeId}`,
           },
           (payload) => {
-            const row = payload.new as Message;
+            const row = payload.new as ChatMessage;
             setMessages((prev) =>
               prev.map((m) => (m.id === row.id ? { ...m, ...row } : m)),
             );
           },
         )
+        .on("broadcast", { event: "typing" }, ({ payload }) => {
+          const data = payload as { sender?: string; typing?: boolean };
+          if (data.sender !== "client") return;
+          if (typingClearRef.current) clearTimeout(typingClearRef.current);
+          if (data.typing) {
+            setIsOtherTyping(true);
+            typingClearRef.current = setTimeout(
+              () => setIsOtherTyping(false),
+              2000,
+            );
+          } else {
+            setIsOtherTyping(false);
+          }
+        })
         .subscribe();
     }
 
@@ -253,18 +351,40 @@ export default function AdminChat() {
 
     return () => {
       cancelled = true;
+      broadcastTyping(false);
+      if (typingIdleRef.current) clearTimeout(typingIdleRef.current);
+      if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
+      if (typingClearRef.current) clearTimeout(typingClearRef.current);
       if (channelRef.current) supabase.removeChannel(channelRef.current);
       channelRef.current = null;
     };
   }, [activeId]);
 
+  useEffect(() => {
+    function tryMark() {
+      if (!activeIdRef.current) return;
+      markMessagesReadIfFocused(
+        createClient(),
+        activeIdRef.current,
+        "client",
+      );
+    }
+    window.addEventListener("focus", tryMark);
+    document.addEventListener("visibilitychange", tryMark);
+    return () => {
+      window.removeEventListener("focus", tryMark);
+      document.removeEventListener("visibilitychange", tryMark);
+    };
+  }, []);
+
   function selectChat(id: string) {
     if (id === activeId) return;
     const chat = chats.find((c) => c.id === id);
+    broadcastTyping(false);
+    setIsOtherTyping(false);
     setMessages([]);
     setDraft("");
-    setChatStatusDraft(chat?.status ?? "");
-    setChatTimeDraft(toDatetimeLocal(chat?.time_remaining ?? null));
+    applyChatDrafts(chat);
     setActiveId(id);
   }
 
@@ -295,14 +415,36 @@ export default function AdminChat() {
     const time_remaining = chatTimeDraft
       ? new Date(chatTimeDraft).toISOString()
       : null;
+    const estimated_budget =
+      budgetDraft.trim() === "" ? null : Number(budgetDraft);
+    const nickname = nicknameDraft.trim() === "" ? null : nicknameDraft.trim();
+    const language = languageDraft.trim() === "" ? null : languageDraft.trim();
+    const max_uploads = mbInputToBytes(maxUploadsDraft);
+    if (max_uploads == null) return;
     await supabase
       .from("chats")
-      .update({ status: chatStatusDraft, time_remaining })
+      .update({
+        status: chatStatusDraft,
+        time_remaining,
+        estimated_budget,
+        nickname,
+        language,
+        max_uploads,
+      })
       .eq("id", activeId);
+    languageRef.current = language;
     setChats((prev) =>
       prev.map((c) =>
         c.id === activeId
-          ? { ...c, status: chatStatusDraft, time_remaining }
+          ? {
+              ...c,
+              status: chatStatusDraft,
+              time_remaining,
+              estimated_budget,
+              nickname,
+              language,
+              max_uploads,
+            }
           : c,
       ),
     );
@@ -336,8 +478,7 @@ export default function AdminChat() {
       const next = prev.filter((c) => c.id !== id);
       const fallback = next[0] ?? null;
       setActiveId(fallback?.id ?? null);
-      setChatStatusDraft(fallback?.status ?? "");
-      setChatTimeDraft(toDatetimeLocal(fallback?.time_remaining ?? null));
+      applyChatDrafts(fallback);
       return next;
     });
     setUnread((prev) => {
@@ -353,12 +494,53 @@ export default function AdminChat() {
     e.preventDefault();
     if (!draft.trim() || !activeId) return;
 
-    const supabase = createClient();
-    await supabase
-      .from("messages")
-      .insert({ chat_id: activeId, sender: "me", content: draft });
-    await bumpChatUpdatedAt(supabase, activeId);
+    const text = draft.trim();
     setDraft("");
+    broadcastTyping(false);
+    if (typingIdleRef.current) clearTimeout(typingIdleRef.current);
+
+    const lang = languageRef.current;
+    const payload = await prepareTranslatedMessage(
+      text,
+      lang,
+      lang ?? "en",
+    );
+
+    const supabase = createClient();
+    await supabase.from("messages").insert({
+      chat_id: activeId,
+      sender: "me",
+      content: payload.content,
+      translated: payload.translated,
+    });
+    await bumpChatUpdatedAt(supabase, activeId);
+  }
+
+  async function handleAttach(
+    file: File,
+    onProgress: (pct: number) => void,
+  ) {
+    if (!activeId) throw new Error("no_chat");
+    const id = activeId;
+    const { key, size, filename } = await uploadAttachment({
+      chatId: id,
+      file,
+      onProgress,
+    });
+    const supabase = createClient();
+    await supabase.from("messages").insert({
+      chat_id: id,
+      sender: "me",
+      content: filename,
+      attachment: key,
+    });
+    const next = await bumpChatUploads(supabase, id, size);
+    await bumpChatUpdatedAt(supabase, id);
+    setChats((prev) =>
+      prev.map((c) =>
+        c.id === id ? { ...c, current_uploads: next } : c,
+      ),
+    );
   }
 
   return (
@@ -367,6 +549,8 @@ export default function AdminChat() {
         {chats.map((chat) => {
           const count = unread[chat.id] ?? 0;
           const isActive = chat.id === activeId;
+          const label = chat.nickname?.trim() || chat.id;
+          const initial = (chat.nickname?.trim() || chat.id).charAt(0);
           let circleClass =
             "relative rounded-full h-10 w-10 flex items-center justify-center text-sm font-bold uppercase cursor-pointer shrink-0 ";
           if (chat.not_a_client) {
@@ -383,10 +567,12 @@ export default function AdminChat() {
               key={chat.id}
               type="button"
               onClick={() => selectChat(chat.id)}
-              title={chat.not_a_client ? `${chat.id} (not a client)` : chat.id}
+              title={
+                chat.not_a_client ? `${label} (not a client)` : label
+              }
               className={circleClass}
             >
-              {chat.id.charAt(0)}
+              {initial}
               {count > 0 && (
                 <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-red-500 text-white text-[10px] leading-4 font-bold">
                   {count > 99 ? "99+" : count}
@@ -397,149 +583,145 @@ export default function AdminChat() {
         })}
       </div>
 
-      <div className="flex flex-col gap-4 w-64 shrink-0 border-r border-border-harder px-3 py-4 font-sans overflow-y-auto">
-        <div className="flex flex-col gap-2">
-          <span className="text-xs uppercase tracking-wider text-muted">
-            Global admin status
-          </span>
-          <input
-            value={adminStatusDraft}
-            onChange={(e) => setAdminStatusDraft(e.target.value)}
-            className="rounded-lg border bg-surface px-3 py-2 text-sm outline-none"
-            placeholder="Default status for new chats"
-          />
-          <div className="flex flex-row gap-2">
-            <button
-              type="button"
-              onClick={saveAdminStatus}
-              className="rounded-lg bg-accent text-surface px-3 py-1.5 text-sm font-bold hover:bg-accent-hover cursor-pointer"
-            >
-              Save
-            </button>
-            <button
-              type="button"
-              onClick={clearAdminStatus}
-              className="rounded-lg border border-border px-3 py-1.5 text-sm cursor-pointer hover:bg-surface-muted"
-            >
-              Clear
-            </button>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-2 border-t border-border-harder pt-4">
-          <span className="text-xs uppercase tracking-wider text-muted">
-            Active chat
-          </span>
-          <input
-            value={chatStatusDraft}
-            onChange={(e) => setChatStatusDraft(e.target.value)}
-            disabled={!activeId}
-            className="rounded-lg border bg-surface px-3 py-2 text-sm outline-none disabled:opacity-50"
-            placeholder="Chat status"
-          />
-          <input
-            type="datetime-local"
-            value={chatTimeDraft}
-            onChange={(e) => setChatTimeDraft(e.target.value)}
-            disabled={!activeId}
-            className="rounded-lg border bg-surface px-3 py-2 text-sm outline-none disabled:opacity-50"
-          />
-          <button
-            type="button"
-            onClick={saveActiveChat}
-            disabled={!activeId}
-            className="rounded-lg bg-accent text-surface px-3 py-1.5 text-sm font-bold hover:bg-accent-hover cursor-pointer disabled:opacity-50"
-          >
-            Save chat
-          </button>
-          <label className="flex flex-row items-center gap-2 text-sm text-foreground cursor-pointer disabled:opacity-50">
-            <input
-              type="checkbox"
-              checked={!!activeChat?.not_a_client}
-              onChange={toggleNotAClient}
-              disabled={!activeId}
-              className="cursor-pointer"
-            />
-            Not a client
-          </label>
-          <button
-            type="button"
-            onClick={deleteActiveChat}
-            disabled={!activeId}
-            className="rounded-lg border border-red-500/50 text-red-500 px-3 py-1.5 text-sm font-bold hover:bg-red-500/10 cursor-pointer disabled:opacity-50"
-          >
-            Delete chat
-          </button>
-        </div>
-      </div>
-
       <div className="flex flex-row flex-1 min-w-0 min-h-0">
         <div className="w-1/2 min-w-0">
           <ChatStatusPanel
             status={activeChat?.status ?? ""}
             timeRemaining={activeChat?.time_remaining ?? null}
+            estimatedBudget={activeChat?.estimated_budget ?? null}
             adminStatusUpdatedAt={adminStatusUpdatedAt}
-          />
-        </div>
-        <div className="w-1/2 min-w-0 flex flex-col px-6 py-6">
-          <header className="flex items-center justify-between pb-4 border-b border-border-harder">
-            <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight font-sans">
-              Chat
-            </h1>
-            <div className="w-12" />
-          </header>
-
-          <div className="flex-1 overflow-y-auto flex flex-col gap-3 py-6">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={
-                  "max-w-[80%] sm:max-w-md rounded-2xl px-4 py-3 text-sm sm:text-base font-sans " +
-                  (message.sender === "me"
-                    ? "self-end bg-accent text-surface"
-                    : "self-start bg-surface-muted text-foreground")
-                }
-              >
-                <span className="block">{message.content}</span>
-                <span
-                  className={
-                    "flex items-center gap-1 mt-1 text-xs " +
-                    (message.sender === "me"
-                      ? "justify-end opacity-80"
-                      : "justify-start text-muted")
-                  }
-                >
-                  {new Date(message.created_at).toLocaleTimeString([], {
-                    hour: "numeric",
-                    minute: "2-digit",
-                  })}
-                  {message.sender === "me" && (
-                    <ReadTicks readAt={message.read_at} light />
-                  )}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          <form
-            onSubmit={sendMessage}
-            className="flex flex-row gap-2 pt-4 border-t border-border-harder"
           >
-            <input
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              disabled={!activeId}
-              placeholder="Type a message..."
-              className="flex-1 rounded-2xl bg-surface-muted px-4 py-3 text-sm sm:text-base font-sans outline-none placeholder:text-muted disabled:opacity-50"
-            />
-            <button
-              type="submit"
-              disabled={!activeId}
-              className="rounded-2xl bg-accent text-surface px-5 py-3 text-sm sm:text-base font-sans font-bold hover:bg-accent-hover cursor-pointer disabled:opacity-50"
-            >
-              Send
-            </button>
-          </form>
+            <div className="flex flex-col gap-4 border-t border-border-harder pt-4">
+              <div className="flex flex-col gap-2">
+                <span className="text-xs uppercase tracking-wider text-muted">
+                  Global admin status
+                </span>
+                <input
+                  value={adminStatusDraft}
+                  onChange={(e) => setAdminStatusDraft(e.target.value)}
+                  className="rounded-lg border bg-surface px-3 py-2 text-sm outline-none"
+                  placeholder="Default status for new chats"
+                />
+                <div className="flex flex-row gap-2">
+                  <button
+                    type="button"
+                    onClick={saveAdminStatus}
+                    className="rounded-lg bg-accent text-surface px-3 py-1.5 text-sm font-bold hover:bg-accent-hover cursor-pointer"
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    onClick={clearAdminStatus}
+                    className="rounded-lg border border-border px-3 py-1.5 text-sm cursor-pointer hover:bg-surface-muted"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <span className="text-xs uppercase tracking-wider text-muted">
+                  Active chat
+                </span>
+                {activeChat?.email && (
+                  <p className="text-xs text-muted">Email: {activeChat.email}</p>
+                )}
+                <input
+                  value={nicknameDraft}
+                  onChange={(e) => setNicknameDraft(e.target.value)}
+                  disabled={!activeId}
+                  className="rounded-lg border bg-surface px-3 py-2 text-sm outline-none disabled:opacity-50"
+                  placeholder="Nickname (admin only)"
+                />
+                <input
+                  value={languageDraft}
+                  onChange={(e) => setLanguageDraft(e.target.value)}
+                  disabled={!activeId}
+                  className="rounded-lg border bg-surface px-3 py-2 text-sm outline-none disabled:opacity-50"
+                  placeholder="Language code (e.g. ur, es) — empty = off"
+                />
+                <input
+                  value={chatStatusDraft}
+                  onChange={(e) => setChatStatusDraft(e.target.value)}
+                  disabled={!activeId}
+                  className="rounded-lg border bg-surface px-3 py-2 text-sm outline-none disabled:opacity-50"
+                  placeholder="Chat status"
+                />
+                <input
+                  type="datetime-local"
+                  value={chatTimeDraft}
+                  onChange={(e) => setChatTimeDraft(e.target.value)}
+                  disabled={!activeId}
+                  className="rounded-lg border bg-surface px-3 py-2 text-sm outline-none disabled:opacity-50"
+                />
+                <input
+                  type="number"
+                  step="0.01"
+                  value={budgetDraft}
+                  onChange={(e) => setBudgetDraft(e.target.value)}
+                  disabled={!activeId}
+                  className="rounded-lg border bg-surface px-3 py-2 text-sm outline-none disabled:opacity-50"
+                  placeholder="Estimated budget"
+                />
+                <p className="text-xs text-muted">
+                  Uploads used:{" "}
+                  {activeChat
+                    ? `${formatBytes(activeChat.current_uploads)} / ${formatBytes(activeChat.max_uploads)}`
+                    : "-"}
+                </p>
+                <input
+                  type="number"
+                  step="1"
+                  min="0"
+                  value={maxUploadsDraft}
+                  onChange={(e) => setMaxUploadsDraft(e.target.value)}
+                  disabled={!activeId}
+                  className="rounded-lg border bg-surface px-3 py-2 text-sm outline-none disabled:opacity-50"
+                  placeholder="Max uploads (MB)"
+                />
+                <button
+                  type="button"
+                  onClick={saveActiveChat}
+                  disabled={!activeId}
+                  className="rounded-lg bg-accent text-surface px-3 py-1.5 text-sm font-bold hover:bg-accent-hover cursor-pointer disabled:opacity-50"
+                >
+                  Save chat
+                </button>
+                <label className="flex flex-row items-center gap-2 text-sm text-foreground cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={!!activeChat?.not_a_client}
+                    onChange={toggleNotAClient}
+                    disabled={!activeId}
+                    className="cursor-pointer"
+                  />
+                  Not a client
+                </label>
+                <button
+                  type="button"
+                  onClick={deleteActiveChat}
+                  disabled={!activeId}
+                  className="rounded-lg border border-red-500/50 text-red-500 px-3 py-1.5 text-sm font-bold hover:bg-red-500/10 cursor-pointer disabled:opacity-50"
+                >
+                  Delete chat
+                </button>
+              </div>
+            </div>
+          </ChatStatusPanel>
+        </div>
+        <div className="w-1/2 min-w-0">
+          <ChatThread
+            messages={messages}
+            draft={draft}
+            onDraftChange={handleDraftChange}
+            onSend={sendMessage}
+            disabled={!activeId}
+            selfSender="me"
+            isOtherTyping={isOtherTyping}
+            chatId={activeId}
+            onAttach={handleAttach}
+          />
         </div>
       </div>
     </section>

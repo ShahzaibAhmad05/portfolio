@@ -2,12 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 export default function IntroSection() {
   const router = useRouter();
+  const [showBeenHere, setShowBeenHere] = useState(false);
 
   const ref = useRef<HTMLButtonElement>(null);
   const x = useMotionValue(0);
@@ -28,6 +30,16 @@ export default function IntroSection() {
   function onMouseLeave() {
     x.set(0);
     y.set(0);
+  }
+
+  async function recoverAccount() {
+    const supabase = createClient();
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?intent=recover`,
+      },
+    });
   }
 
   return (
@@ -85,18 +97,17 @@ export default function IntroSection() {
                 <path d="M5 12h14M13 6l6 6-6 6" />
               </svg>
             </motion.button>
-            <Link
-              href="/chat"
-              className="text-muted text-sm hover:text-foreground hover:underline underline-offset-4 ml-5 mr-auto"
+            <button
+              type="button"
+              onClick={() => setShowBeenHere(true)}
+              className="text-muted text-sm hover:text-foreground hover:underline underline-offset-4 ml-5 mr-auto cursor-pointer bg-transparent border-0 p-0 font-sans"
             >
               Already been here?
-            </Link>
+            </button>
           </div>
         </div>
       </div>
-      <div
-        className="absolute bottom-5 sm:bottom-7 flex flex-col items-center text-muted cursor-default"
-      >
+      <div className="absolute bottom-5 sm:bottom-7 flex flex-col items-center text-muted cursor-default">
         <span className="text-sm tracking-wider uppercase">Scroll</span>
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -112,6 +123,42 @@ export default function IntroSection() {
           <path d="M12 5v14M6 13l6 6 6-6" />
         </svg>
       </div>
+
+      {showBeenHere && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 px-6">
+          <div className="w-full max-w-md rounded-2xl bg-surface border border-border p-6 flex flex-col gap-4 font-sans">
+            <div className="flex flex-col gap-1">
+              <h2 className="text-xl font-extrabold tracking-tight">
+                Already been here?
+              </h2>
+              <p className="text-sm text-muted">
+                Pick what fits so we can get you back into chat.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={recoverAccount}
+              className="rounded-xl bg-accent text-surface px-4 py-3 text-base font-bold hover:bg-accent-hover cursor-pointer"
+            >
+              I had an account here
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/chat?c=returning")}
+              className="rounded-xl border border-border bg-surface-muted px-4 py-3 text-base font-bold hover:bg-surface cursor-pointer"
+            >
+              I didnt have an account here
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowBeenHere(false)}
+              className="text-sm text-muted hover:text-foreground cursor-pointer"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
