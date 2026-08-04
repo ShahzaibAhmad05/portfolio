@@ -40,3 +40,12 @@ Bucket should stay private. Add CORS for your site origins (`PUT`, `GET`, `HEAD`
 ## Admin Dashboard
 
 Is able to browse all chats and respond to all incoming messages.
+
+## LocalStorage Usage
+
+Storing `chat_id`.
+
+## CSS Global Hints
+
+- `font-sans`: Be Vietnam Pro font
+- `font-display`: Bayon font

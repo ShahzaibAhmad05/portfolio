@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  --deeper: #ffffff;
   --background: #faf9f5;
   --foreground: #2d2b26;
   --surface: #ffffff;
@@ -36,6 +37,7 @@
 
 @theme inline {
   --color-background: var(--background);
+  --color-deeper: var(--deeper);
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
   --color-surface-muted: var(--surface-muted);
@@ -46,14 +48,15 @@
   --color-accent-hover: var(--accent-hover);
   --color-accent-foreground: var(--accent-foreground);
   --color-error: var(--error);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-be-vietnam-pro);
+  --font-display: var(--font-bayon);
   --animate-nudge-x: nudge-x 1s ease-in-out infinite;
   --animate-nudge-y: nudge-y 1.2s ease-in-out infinite;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
+    --deeper: #1C1C1B;
     --background: #1F1F1E;
     --foreground: #f0eee6;
     --surface: #2C2C2A;
@@ -71,5 +74,5 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-be-vietnam-pro), ui-sans-serif, system-ui, sans-serif;
 }

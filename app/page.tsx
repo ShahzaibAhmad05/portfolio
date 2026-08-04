@@ -18,7 +18,9 @@ export default function Home() {
 
   useEffect(() => {
     trackVisitor();
-    if (localStorage.getItem("chat_id")) router.push("/chat");
+    if (localStorage.getItem("chat_id")) {
+      router.push("/chat");
+    }
   }, [router]);
 
   useEffect(() => {

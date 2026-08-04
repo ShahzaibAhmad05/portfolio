@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Be_Vietnam_Pro, Bayon } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const beVietnamPro = Be_Vietnam_Pro({
+  variable: "--font-be-vietnam-pro",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
   preload: true,
   adjustFontFallback: true,
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const bayon = Bayon({
+  variable: "--font-bayon",
   subsets: ["latin"],
+  weight: "400",
   display: "swap",
   preload: true,
 });
@@ -30,9 +32,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${beVietnamPro.variable} ${bayon.variable} h-full antialiased`}
     >
-      <body className={`${geistSans.className} min-h-full`}>
+      <body className={`${beVietnamPro.className} min-h-full`}>
         {children}
       </body>
     </html>
