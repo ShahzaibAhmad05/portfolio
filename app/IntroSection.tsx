@@ -63,12 +63,12 @@ export default function IntroSection() {
           Chat
         </Link>
       </motion.div>
-      {/* background glow */}
+      {/* background glow -> figma generated */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, ease, delay: 0.2 }}
-        className="flex inset-0 absolute mt-[20svh] md:mt-[27svh] md:ml-[15svh] -z-1"
+        className="flex inset-0 absolute mt-[26svh] md:mt-[27svh] md:ml-[15svh] -z-1"
       >
         <svg
           width="1000"
@@ -135,17 +135,17 @@ export default function IntroSection() {
       </motion.div>
       {/* header and picture */}
       <div className="flex flex-row items-end justify-center md:mb-[20svh] relative">
-        <h1 className="relative text-foreground cursor-default leading-[0.78] font-normal mx-5 md:mx-none">
+        <h1 className="relative text-foreground cursor-default leading-[0.95] md:leading-[0.78] font-normal">
           <motion.div
             {...fromLeft}
             className="relative z-0 flex flex-col"
           >
-            <span className="font-display text-5xl md:text-[77px]">Building Software</span>
-            <span className="font-display text-accent text-8xl md:text-[170px] -mt-2.5 md:mt-0">
+            <span className="font-display text-[48px] md:text-[77px]">Building Software</span>
+            <span className="font-display text-accent text-[96px] md:text-[170px] -mt-2.5 md:mt-0">
               3XBETTER
             </span>
             <span
-              className="font-display text-[110px] -mt-1.75 invisible"
+              className="font-display text-[60px] md:text-[110px] -mt-3.5 md:-mt-1.5"
               aria-hidden
             >
               than AI today
@@ -153,12 +153,12 @@ export default function IntroSection() {
           </motion.div>
           <motion.div
             {...fromLeft}
-            className="absolute bottom-0 left-0 z-4 font-display text-[110px] pointer-events-none"
+            className="absolute bottom-0 left-0 z-4 font-display text-[60px] md:text-[110px]"
           >
             than AI today
           </motion.div>
         </h1>
-        <motion.div {...fromRight} className="relative z-1 flex -ml-27">
+        <motion.div {...fromRight} className="relative z-1 flex md:-ml-32">
           <Image
             src="/pfp.png"
             alt="profile picture"

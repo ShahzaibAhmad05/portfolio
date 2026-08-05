@@ -34,3 +34,7 @@ Storing `chat_id`.
 
 - `font-sans`: Be Vietnam Pro font
 - `font-display`: Bayon font
+
+## Styling
+
+Some effects and glows are figma-generated and may be in weird svg styles.
