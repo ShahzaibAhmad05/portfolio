@@ -21,7 +21,7 @@ const bayon = Bayon({
 
 export const metadata: Metadata = {
   title: "Shahzaib Ahmad Shahid | Software Engineer",
-  description: "3+ Years Of Building Software Faster Than Your AI At 0.1X the Cumulative API Costs.",
+  description: "3+ Years Of Building Software Faster Than AI At 0.1X the API Costs.",
 };
 
 export default function RootLayout({

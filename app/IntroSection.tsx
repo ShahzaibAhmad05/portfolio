@@ -23,7 +23,7 @@ export default function IntroSection() {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?intent=admin`,
+        redirectTo: `/chat`,
       },
     });
   }
@@ -158,7 +158,7 @@ export default function IntroSection() {
             than AI today
           </motion.div>
         </h1>
-        <motion.div {...fromRight} className="relative z-1 flex md:-ml-32">
+        <motion.div {...fromRight} className="relative z-1 flex md:-ml-27">
           <Image
             src="/pfp.png"
             alt="profile picture"

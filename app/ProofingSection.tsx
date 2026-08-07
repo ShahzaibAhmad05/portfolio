@@ -1,7 +1,100 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform, type MotionValue } from "framer-motion";
+import { useRef } from "react";
+
+const scatterIcons = [
+  { src: "/react.svg", top: "8%", side: "left", offset: "4%", size: 40 },
+  { src: "/code.svg", top: "21%", side: "left", offset: "9%", size: 34 },
+  { src: "/terminal.svg", top: "34%", side: "left", offset: "5%", size: 32 },
+  { src: "/database.svg", top: "47%", side: "left", offset: "11%", size: 36 },
+  { src: "/server.svg", top: "60%", side: "left", offset: "4%", size: 34 },
+  { src: "/gitBranch.svg", top: "73%", side: "left", offset: "10%", size: 30 },
+  { src: "/cloud.svg", top: "86%", side: "left", offset: "6%", size: 34 },
+  { src: "/globe.svg", top: "8%", side: "right", offset: "4%", size: 40 },
+  { src: "/smartphone.svg", top: "21%", side: "right", offset: "9%", size: 30 },
+  { src: "/shield.svg", top: "34%", side: "right", offset: "5%", size: 34 },
+  { src: "/zap.svg", top: "47%", side: "right", offset: "11%", size: 32 },
+  { src: "/layers.svg", top: "60%", side: "right", offset: "4%", size: 36 },
+  { src: "/hash.svg", top: "73%", side: "right", offset: "10%", size: 30 },
+  { src: "/cpu.svg", top: "86%", side: "right", offset: "6%", size: 34 },
+];
+
+const headlineLines = ["3+ Years Of", "Software", "Engineering"];
+
+// icons reveal across the first slice of the pinned scroll, headline across the rest
+const ICON_RANGE: [number, number] = [0, 0.45];
+const HEADLINE_RANGE: [number, number] = [0.4, 1];
+
+function rangeForIndex(
+  index: number,
+  count: number,
+  [start, end]: [number, number],
+): [number, number] {
+  const step = (end - start) / count;
+  return [start + index * step, start + (index + 1) * step];
+}
+
+function ScatterIcon({
+  icon,
+  progress,
+  range,
+}: {
+  icon: (typeof scatterIcons)[number];
+  progress: MotionValue<number>;
+  range: [number, number];
+}) {
+  const opacity = useTransform(progress, range, [0.15, 1]);
+
+  return (
+    <motion.div
+      className="absolute bg-foreground"
+      style={{
+        top: icon.top,
+        [icon.side]: icon.offset,
+        width: icon.size,
+        height: icon.size,
+        opacity,
+        maskImage: `url(${icon.src})`,
+        WebkitMaskImage: `url(${icon.src})`,
+        maskSize: "contain",
+        WebkitMaskSize: "contain",
+        maskRepeat: "no-repeat",
+        WebkitMaskRepeat: "no-repeat",
+        maskPosition: "center",
+        WebkitMaskPosition: "center",
+      }}
+    />
+  );
+}
+
+function RevealLine({
+  line,
+  progress,
+  range,
+}: {
+  line: string;
+  progress: MotionValue<number>;
+  range: [number, number];
+}) {
+  const revealPercent = useTransform(progress, range, [0, 100]);
+  const clipPath = useTransform(
+    revealPercent,
+    (v) => `inset(0 ${100 - v}% 0 0)`,
+  );
+  return (
+    <span className="relative block" aria-hidden>
+      <span className="text-surface-muted">{line}</span>
+      <motion.span
+        style={{ clipPath }}
+        className="absolute inset-0 text-foreground"
+      >
+        {line}
+      </motion.span>
+    </span>
+  );
+}
 
 const reviews = [
   {
@@ -74,82 +167,39 @@ const reviews = [
 ];
 
 export default function ProofingSection() {
+  const pinRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: pinRef,
+    offset: ["start start", "end end"],
+  });
+
   return (
-    <section className="flex flex-col justify-between px-8 md:px-28 bg-surface">
-      <h2 className="text-5xl mx-auto sm:text-6xl font-extrabold pt-18 pb-14 tracking-tighter text-foreground font-sans">
-        3+ Years Of Building Software
-      </h2>
-
-      <div className="pb-6">
-        <p className="font-semibold font-sans text-4xl mb-2 sm:mb-0">
-          Reviews From My Clients:
-        </p>
-        <p className="text-muted text-sm sm:text-xs">Usernames of clients are put here exactly as they are on source platforms, omitting digits.</p>
-      </div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.7 }}
-        className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-3"
-      >
-        {reviews.map((review, idx) => (
-          <Link
-            key={idx}
-            href={review.proof}
-            title={review.proofTagline}
-            className={
-              (idx >= 3 ? "hidden sm:flex " : "flex ") +
-              "mb-3 flex-col gap-3 rounded-lg bg-surface-muted border-2 border-transparent p-4 break-inside-avoid" +
-              (review.proof ? " hover:border-border" : " cursor-default")
-            }
+    <section className="flex flex-col justify-between px-8 md:px-12 bg-surface">
+      <div ref={pinRef} className="relative h-[250vh]">
+        <div className="sticky top-0 flex items-center justify-center overflow-hidden h-svh">
+          {scatterIcons.map((icon, idx) => (
+            <ScatterIcon
+              key={idx}
+              icon={icon}
+              progress={scrollYProgress}
+              range={rangeForIndex(idx, scatterIcons.length, ICON_RANGE)}
+            />
+          ))}
+          <h2
+            aria-label="3+ Years Of Software Engineering"
+            className="relative z-10 text-center uppercase leading-[0.85] font-display text-6xl sm:text-7xl md:text-8xl lg:text-[110px]"
           >
-            <div className="flex flex-row gap-2 items-center">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-surface font-semibold">
-                {review.name.charAt(0).toUpperCase()}
-              </div>
-              {review.proof && (<div className="flex items-center justify-center bg-accent rounded-full -ml-5 -mb-6">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="size-3.5 text-surface-muted"
-                  aria-hidden
-                >
-                  <path d="M5 13l4 4L19 7" />
-                </svg>
-              </div>)}
-              <div className="flex flex-col">
-                <span className="text-md font-bold">{review.name}</span>
-                <span className="text-sm text-muted -mt-1">
-                  {review.location}
-                </span>
-              </div>
-            </div>
-            <p className="text-lg">&quot;{review.text}&quot;</p>
-            {review.featured.length > 0 && (
-              <div className="flex flex-col gap-1">
-                {/* <span className="text-md font-bold text-muted">Featured:</span> */}
-                {review.featured.map((tag, idx) => (
-                  <div
-                    key={idx}
-                    className="bg-surface text-xs rounded-xl -ml-1 mr-auto px-2.5 py-1.5"
-                  >
-                    {tag}
-                  </div>
-                ))}
-              </div>
-            )}
-            <hr className="border-border-harder" />
-            <p className="text-sm">{review.details}</p>
-          </Link>
-        ))}
-      </motion.div>
+            {headlineLines.map((line, i) => (
+              <RevealLine
+                key={line}
+                line={line}
+                progress={scrollYProgress}
+                range={rangeForIndex(i, headlineLines.length, HEADLINE_RANGE)}
+              />
+            ))}
+          </h2>
+        </div>
+      </div>
 
       <hr className="border-border-harder my-18" />
       <motion.div
