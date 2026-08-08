@@ -111,7 +111,7 @@ const reviews = [
     location: "United States",
     flag: "/flags/us.png",
     text: "Simply the best",
-    textSize: "text-5xl",
+    textSize: "text-3xl sm:text-5xl",
     link: "https://www.fiverr.com/shahzaibahmad05/convert-your-python-projects-to-exe",
     from: "Fiverr Pro Client",
   },
@@ -121,7 +121,7 @@ const reviews = [
     location: "Switzerland",
     flag: "/flags/switzerland.png",
     text: "Excellent work. I would work with him again anytime.",
-    textSize: "text-3xl",
+    textSize: "text-2xl sm:text-3xl",
     link: "https://www.fiverr.com/shahzaibahmad05/convert-your-python-projects-to-exe",
     from: "Verified Client From Fiverr",
   },
@@ -131,7 +131,7 @@ const reviews = [
     location: "Morocco",
     flag: "/flags/morocco.png",
     text: "Nicely done, appreciate the effort",
-    textSize: "text-3xl",
+    textSize: "text-2xl sm:text-3xl",
     link: "https://www.fiverr.com/shahzaibahmad05/convert-your-python-projects-to-exe",
     from: "Verified Client From Fiverr",
   },
@@ -184,16 +184,16 @@ export default function ProofingSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.4 }}
             transition={{ duration: 0.5, delay: idx * 0.05 }}
-            className="rounded-3xl bg-surface-muted px-6 py-6 md:px-10 md:py-8 w-2xl border-2 border-transparent hover:border-border-harder"
+            className="rounded-3xl bg-surface-muted px-6 py-6 md:px-10 md:py-8 w-full max-w-2xl border-2 border-transparent hover:border-border-harder"
           >
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <Image
                   src={review.pfp}
                   alt={review.name}
                   width={44}
                   height={44}
-                  className="size-11 rounded-full object-cover"
+                  className="size-11 rounded-full object-cover shrink-0"
                 />
                 <div className="flex flex-col">
                   <span className="font-semibold font-sans">{review.name}</span>
@@ -248,7 +248,7 @@ export default function ProofingSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.6 }}
           transition={{ duration: 0.7 }}
-          className="flex flex-row items-center justify-center gap-4 text-xl sm:text-4xl lg:text-6xl font-bold font-sans tracking-tight text-foreground cursor-default"
+          className="flex flex-row flex-wrap items-center justify-center gap-2 sm:gap-4 text-lg sm:text-4xl lg:text-6xl font-bold font-sans tracking-tight text-foreground cursor-default text-center"
         >
           <p>Check My Profile On</p>
           <Link

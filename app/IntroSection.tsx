@@ -140,12 +140,12 @@ export default function IntroSection() {
             {...fromLeft}
             className="relative z-0 flex flex-col"
           >
-            <span className="font-display text-[48px] md:text-[77px]">Building Software</span>
-            <span className="font-display text-accent text-[96px] md:text-[170px] -mt-2.5 md:mt-0">
+            <span className="font-display text-[30px] sm:text-[40px] md:text-[77px]">Building Software</span>
+            <span className="font-display text-accent text-[60px] sm:text-[78px] md:text-[170px] -mt-1.5 sm:-mt-2 md:mt-0">
               3XBETTER
             </span>
             <span
-              className="font-display text-[60px] md:text-[110px] -mt-3.5 md:-mt-1.5"
+              className="font-display text-[38px] sm:text-[48px] md:text-[110px] -mt-2 sm:-mt-2.5 md:-mt-1.5"
               aria-hidden
             >
               than AI today
@@ -153,7 +153,7 @@ export default function IntroSection() {
           </motion.div>
           <motion.div
             {...fromLeft}
-            className="absolute bottom-0 left-0 z-4 font-display text-[60px] md:text-[110px]"
+            className="absolute bottom-0 left-0 z-4 font-display text-[38px] sm:text-[48px] md:text-[110px]"
           >
             than AI today
           </motion.div>
