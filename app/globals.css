@@ -58,11 +58,11 @@
   :root {
     --deeper: #1C1C1B;
     --background: #242423;
-    --foreground: #f0eee6;
+    --foreground: #ffffff;
     --surface: #333331;
     --surface-muted: #474745;
     --border: #46453f;
-    --border-harder: #525149;
+    --border-harder: #5d5c56;
     --muted: #a8a5a0;
     --accent: #d97757;
     --accent-foreground: #262624;
