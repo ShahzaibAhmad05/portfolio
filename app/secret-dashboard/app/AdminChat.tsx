@@ -10,8 +10,17 @@ import {
   prepareTranslatedMessage,
 } from "@/lib/chat";
 import { formatBytes, uploadAttachment } from "@/lib/attachments";
-import ChatStatusPanel from "@/app/ChatStatusPanel";
 import ChatThread, { type ChatMessage } from "@/app/ChatThread";
+
+const fieldClass =
+  "rounded-xl bg-[#474744] px-3 py-2 text-sm text-white outline-none placeholder:text-[#8f8f8c] disabled:opacity-50";
+const labelClass = "text-xs uppercase tracking-wider text-[#8f8f8c]";
+const primaryBtn =
+  "cursor-pointer rounded-full bg-[#D97757] px-4 py-2 text-sm font-bold text-white hover:bg-[#c96747] disabled:cursor-not-allowed disabled:opacity-50";
+const secondaryBtn =
+  "cursor-pointer rounded-full border border-white/15 px-4 py-2 text-sm text-white/80 hover:bg-white/5";
+const dangerBtn =
+  "cursor-pointer rounded-full border border-red-500/50 px-4 py-2 text-sm font-bold text-red-400 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50";
 
 type Chat = {
   id: string;
@@ -160,7 +169,11 @@ export default function AdminChat() {
         "id, status, time_remaining, updated_at, not_a_client, estimated_budget, email, nickname, language, current_uploads, max_uploads",
       )
       .order("updated_at", { ascending: false })
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) {
+          console.error("failed to load chats", error);
+          return;
+        }
         if (!data) return;
         const sorted = sortChats(data.map((c) => normalizeChat(c as Chat)));
         setChats(sorted);
@@ -544,37 +557,40 @@ export default function AdminChat() {
   }
 
   return (
-    <section className="flex flex-row h-svh min-h-0">
-      <div className="flex flex-col gap-1 px-2 py-3 border-r border-border-harder h-full overflow-y-auto">
+    <section className="flex h-svh min-h-0 flex-row bg-[#242423]">
+      <div className="flex h-full w-14 shrink-0 flex-col items-center gap-2 overflow-y-auto bg-[#333331] px-2 py-3 sm:w-16">
+        {chats.length === 0 && (
+          <span className="mt-2 text-[10px] leading-tight text-[#8f8f8c] text-center">
+            no chats
+          </span>
+        )}
         {chats.map((chat) => {
           const count = unread[chat.id] ?? 0;
           const isActive = chat.id === activeId;
           const label = chat.nickname?.trim() || chat.id;
           const initial = (chat.nickname?.trim() || chat.id).charAt(0);
           let circleClass =
-            "relative rounded-full h-10 w-10 flex items-center justify-center text-sm font-bold uppercase cursor-pointer shrink-0 ";
+            "relative flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-sm font-bold uppercase ";
           if (chat.not_a_client) {
             circleClass += isActive
-              ? "bg-muted text-surface ring-2 ring-muted"
-              : "bg-border-harder text-muted hover:bg-muted/40";
+              ? "bg-[#5d5c56] text-white ring-2 ring-[#8f8f8c]"
+              : "bg-[#474744] text-[#8f8f8c] hover:bg-[#54534f]";
           } else if (isActive) {
-            circleClass += "bg-accent text-surface";
+            circleClass += "bg-[#D97757] text-white";
           } else {
-            circleClass += "bg-surface hover:bg-surface-muted";
+            circleClass += "bg-[#474744] text-white hover:bg-[#54534f]";
           }
           return (
             <button
               key={chat.id}
               type="button"
               onClick={() => selectChat(chat.id)}
-              title={
-                chat.not_a_client ? `${label} (not a client)` : label
-              }
+              title={chat.not_a_client ? `${label} (not a client)` : label}
               className={circleClass}
             >
               {initial}
               {count > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-red-500 text-white text-[10px] leading-4 font-bold">
+                <span className="absolute -top-1 -right-1 h-4 min-w-4 rounded-full bg-red-500 px-1 text-[10px] leading-4 font-bold text-white">
                   {count > 99 ? "99+" : count}
                 </span>
               )}
@@ -583,135 +599,137 @@ export default function AdminChat() {
         })}
       </div>
 
-      <div className="flex flex-row flex-1 min-w-0 min-h-0">
-        <div className="w-1/2 min-w-0">
-          <ChatStatusPanel
-            status={activeChat?.status ?? ""}
-            timeRemaining={activeChat?.time_remaining ?? null}
-            estimatedBudget={activeChat?.estimated_budget ?? null}
-            adminStatusUpdatedAt={adminStatusUpdatedAt}
-          >
-            <div className="flex flex-col gap-4 border-t border-border-harder pt-4">
-              <div className="flex flex-col gap-2">
-                <span className="text-xs uppercase tracking-wider text-muted">
-                  Global admin status
-                </span>
-                <input
-                  value={adminStatusDraft}
-                  onChange={(e) => setAdminStatusDraft(e.target.value)}
-                  className="rounded-lg border bg-surface px-3 py-2 text-sm outline-none"
-                  placeholder="Default status for new chats"
-                />
-                <div className="flex flex-row gap-2">
-                  <button
-                    type="button"
-                    onClick={saveAdminStatus}
-                    className="rounded-lg bg-accent text-surface px-3 py-1.5 text-sm font-bold hover:bg-accent-hover cursor-pointer"
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    onClick={clearAdminStatus}
-                    className="rounded-lg border border-border px-3 py-1.5 text-sm cursor-pointer hover:bg-surface-muted"
-                  >
-                    Clear
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <span className="text-xs uppercase tracking-wider text-muted">
-                  Active chat
-                </span>
-                {activeChat?.email && (
-                  <p className="text-xs text-muted">Email: {activeChat.email}</p>
-                )}
-                <input
-                  value={nicknameDraft}
-                  onChange={(e) => setNicknameDraft(e.target.value)}
-                  disabled={!activeId}
-                  className="rounded-lg border bg-surface px-3 py-2 text-sm outline-none disabled:opacity-50"
-                  placeholder="Nickname (admin only)"
-                />
-                <input
-                  value={languageDraft}
-                  onChange={(e) => setLanguageDraft(e.target.value)}
-                  disabled={!activeId}
-                  className="rounded-lg border bg-surface px-3 py-2 text-sm outline-none disabled:opacity-50"
-                  placeholder="Language code (e.g. ur, es) — empty = off"
-                />
-                <input
-                  value={chatStatusDraft}
-                  onChange={(e) => setChatStatusDraft(e.target.value)}
-                  disabled={!activeId}
-                  className="rounded-lg border bg-surface px-3 py-2 text-sm outline-none disabled:opacity-50"
-                  placeholder="Chat status"
-                />
-                <input
-                  type="datetime-local"
-                  value={chatTimeDraft}
-                  onChange={(e) => setChatTimeDraft(e.target.value)}
-                  disabled={!activeId}
-                  className="rounded-lg border bg-surface px-3 py-2 text-sm outline-none disabled:opacity-50"
-                />
-                <input
-                  type="number"
-                  step="0.01"
-                  value={budgetDraft}
-                  onChange={(e) => setBudgetDraft(e.target.value)}
-                  disabled={!activeId}
-                  className="rounded-lg border bg-surface px-3 py-2 text-sm outline-none disabled:opacity-50"
-                  placeholder="Estimated budget"
-                />
-                <p className="text-xs text-muted">
-                  Uploads used:{" "}
-                  {activeChat
-                    ? `${formatBytes(activeChat.current_uploads)} / ${formatBytes(activeChat.max_uploads)}`
-                    : "-"}
-                </p>
-                <input
-                  type="number"
-                  step="1"
-                  min="0"
-                  value={maxUploadsDraft}
-                  onChange={(e) => setMaxUploadsDraft(e.target.value)}
-                  disabled={!activeId}
-                  className="rounded-lg border bg-surface px-3 py-2 text-sm outline-none disabled:opacity-50"
-                  placeholder="Max uploads (MB)"
-                />
-                <button
-                  type="button"
-                  onClick={saveActiveChat}
-                  disabled={!activeId}
-                  className="rounded-lg bg-accent text-surface px-3 py-1.5 text-sm font-bold hover:bg-accent-hover cursor-pointer disabled:opacity-50"
-                >
-                  Save chat
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 p-4 lg:flex-row lg:p-6">
+        <div className="min-h-0 w-full overflow-y-auto rounded-[30px] bg-[#333331] p-6 font-sans lg:w-[42%]">
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-2">
+              <span className={labelClass}>Global admin status</span>
+              <input
+                value={adminStatusDraft}
+                onChange={(e) => setAdminStatusDraft(e.target.value)}
+                className={fieldClass}
+                placeholder="Default status for new chats"
+              />
+              <p className="text-xs text-[#8f8f8c]">
+                Last updated{" "}
+                {adminStatusUpdatedAt
+                  ? new Date(adminStatusUpdatedAt).toLocaleString([], {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })
+                  : "-"}
+              </p>
+              <div className="flex flex-row gap-2">
+                <button type="button" onClick={saveAdminStatus} className={primaryBtn}>
+                  Save
                 </button>
-                <label className="flex flex-row items-center gap-2 text-sm text-foreground cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={!!activeChat?.not_a_client}
-                    onChange={toggleNotAClient}
-                    disabled={!activeId}
-                    className="cursor-pointer"
-                  />
-                  Not a client
-                </label>
-                <button
-                  type="button"
-                  onClick={deleteActiveChat}
-                  disabled={!activeId}
-                  className="rounded-lg border border-red-500/50 text-red-500 px-3 py-1.5 text-sm font-bold hover:bg-red-500/10 cursor-pointer disabled:opacity-50"
-                >
-                  Delete chat
+                <button type="button" onClick={clearAdminStatus} className={secondaryBtn}>
+                  Clear
                 </button>
               </div>
             </div>
-          </ChatStatusPanel>
+
+            <hr className="border-white/10" />
+
+            <div className="flex flex-col gap-2">
+              <span className={labelClass}>Active chat</span>
+              {activeChat?.email && (
+                <p className="text-xs text-[#BCBCBC]">
+                  Email: {activeChat.email}
+                </p>
+              )}
+              <input
+                value={nicknameDraft}
+                onChange={(e) => setNicknameDraft(e.target.value)}
+                disabled={!activeId}
+                className={fieldClass}
+                placeholder="Nickname (admin only)"
+              />
+              <input
+                value={languageDraft}
+                onChange={(e) => setLanguageDraft(e.target.value)}
+                disabled={!activeId}
+                className={fieldClass}
+                placeholder="Language code (e.g. ur, es) — empty = off"
+              />
+              <input
+                value={chatStatusDraft}
+                onChange={(e) => setChatStatusDraft(e.target.value)}
+                disabled={!activeId}
+                className={fieldClass}
+                placeholder="Chat status"
+              />
+              <input
+                type="datetime-local"
+                value={chatTimeDraft}
+                onChange={(e) => setChatTimeDraft(e.target.value)}
+                disabled={!activeId}
+                className={fieldClass + " scheme-dark"}
+              />
+              <input
+                type="number"
+                step="0.01"
+                value={budgetDraft}
+                onChange={(e) => setBudgetDraft(e.target.value)}
+                disabled={!activeId}
+                className={fieldClass}
+                placeholder="Estimated budget"
+              />
+              <p className="text-xs text-[#8f8f8c]">
+                Uploads used:{" "}
+                {activeChat
+                  ? `${formatBytes(activeChat.current_uploads)} / ${formatBytes(activeChat.max_uploads)}`
+                  : "-"}
+              </p>
+              <input
+                type="number"
+                step="1"
+                min="0"
+                value={maxUploadsDraft}
+                onChange={(e) => setMaxUploadsDraft(e.target.value)}
+                disabled={!activeId}
+                className={fieldClass}
+                placeholder="Max uploads (MB)"
+              />
+              <button
+                type="button"
+                onClick={saveActiveChat}
+                disabled={!activeId}
+                className={primaryBtn}
+              >
+                Save chat
+              </button>
+              <label className="flex cursor-pointer flex-row items-center gap-2 text-sm text-white/80">
+                <input
+                  type="checkbox"
+                  checked={!!activeChat?.not_a_client}
+                  onChange={toggleNotAClient}
+                  disabled={!activeId}
+                  className="cursor-pointer accent-[#D97757]"
+                />
+                Not a client
+              </label>
+              <button
+                type="button"
+                onClick={deleteActiveChat}
+                disabled={!activeId}
+                className={dangerBtn}
+              >
+                Delete chat
+              </button>
+            </div>
+          </div>
         </div>
-        <div className="w-1/2 min-w-0">
+
+        <div className="min-h-0 min-w-0 w-full flex-1">
           <ChatThread
+            variant="admin"
+            adminTitle={
+              activeChat
+                ? nicknameDraft.trim() || activeChat.nickname || activeChat.id
+                : undefined
+            }
+            adminSubtitle={activeChat?.email ?? undefined}
             messages={messages}
             draft={draft}
             onDraftChange={handleDraftChange}

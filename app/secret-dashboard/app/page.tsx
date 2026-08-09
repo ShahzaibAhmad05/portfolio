@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function SecretDashboardApp() {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col bg-[#242423]">
       <AdminChat />
       <AdminStats />
     </div>

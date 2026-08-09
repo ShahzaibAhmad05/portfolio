@@ -17,22 +17,22 @@ export default async function SecretDashboardSignIn() {
   if (user) redirect("/secret-dashboard/app");
 
   return (
-    <div className="flex h-svh flex-col items-center justify-center px-6 py-16">
+    <div className="flex h-svh flex-col items-center justify-center bg-[#242423] px-6 py-16">
       <div className="flex flex-col items-center justify-center gap-8">
-        <h1 className="absolute -z-1 text-6xl font-extrabold tracking-tighter text-accent font-sans lg:text-[220px]">
+        <h1 className="absolute -z-1 font-sans text-6xl font-extrabold tracking-tighter text-[#D97757] lg:text-[220px]">
           Warning!
         </h1>
 
-        <div className="flex flex-col gap-3 items-center justify-center bg-background/95 rounded-xl p-6">
-          <p className="text-lg font-semibold -mt-4 z-1">
-            return to the{' '}
+        <div className="z-1 flex flex-col items-center justify-center gap-4 rounded-[30px] bg-[#333331] p-8">
+          <p className="-mt-1 text-lg font-semibold text-white">
+            return to the{" "}
             <Link
               href="/"
-              className="text-accent hover:underline underline-offset-4 hover:text-accent-hover"
+              className="text-[#D97757] underline-offset-4 hover:text-[#c96747] hover:underline"
             >
               Homepage
-            </Link>
-            {' '}if you are not the admin
+            </Link>{" "}
+            if you are not the admin
           </p>
           <GoogleSignInButton />
         </div>

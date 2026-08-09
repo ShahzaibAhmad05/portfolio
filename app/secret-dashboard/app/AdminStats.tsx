@@ -132,27 +132,37 @@ export default function AdminStats() {
 
   const label = `${MONTHS[month]} ${year}`;
 
+  const tickStyle = { fontSize: 11, fill: "#BCBCBC" };
+  const tooltipStyle = {
+    background: "#333331",
+    border: "1px solid #474744",
+    borderRadius: 12,
+    color: "#E2E2E2",
+  };
+
   return (
-    <section className="flex flex-col gap-8 px-6 md:px-10 py-10 border-t border-border-harder bg-background font-sans">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <section className="flex flex-col gap-8 bg-[#242423] px-6 py-10 font-sans md:px-10">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
-          <span className="text-xs uppercase tracking-wider text-muted">
+          <span className="text-xs uppercase tracking-wider text-[#8f8f8c]">
             Stats period
           </span>
-          <p className="text-xl font-extrabold tracking-tight">{label}</p>
+          <p className="text-xl font-extrabold tracking-tight text-white">
+            {label}
+          </p>
         </div>
         <div className="flex flex-row items-center gap-2">
           <button
             type="button"
             onClick={() => shiftMonth(-1)}
-            className="rounded-lg border border-border px-3 py-2 text-sm cursor-pointer hover:bg-surface-muted"
+            className="cursor-pointer rounded-full border border-white/15 px-3 py-2 text-sm text-white/80 hover:bg-white/5"
           >
             Prev
           </button>
           <select
             value={month}
             onChange={(e) => setMonth(Number(e.target.value))}
-            className="rounded-lg border bg-surface px-3 py-2 text-sm outline-none"
+            className="rounded-xl bg-[#474744] px-3 py-2 text-sm text-white outline-none"
           >
             {MONTHS.map((name, i) => (
               <option key={name} value={i}>
@@ -163,7 +173,7 @@ export default function AdminStats() {
           <select
             value={year}
             onChange={(e) => setYear(Number(e.target.value))}
-            className="rounded-lg border bg-surface px-3 py-2 text-sm outline-none"
+            className="rounded-xl bg-[#474744] px-3 py-2 text-sm text-white outline-none"
           >
             {years.map((y) => (
               <option key={y} value={y}>
@@ -174,20 +184,20 @@ export default function AdminStats() {
           <button
             type="button"
             onClick={() => shiftMonth(1)}
-            className="rounded-lg border border-border px-3 py-2 text-sm cursor-pointer hover:bg-surface-muted"
+            className="cursor-pointer rounded-full border border-white/15 px-3 py-2 text-sm text-white/80 hover:bg-white/5"
           >
             Next
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="rounded-2xl border border-border bg-surface p-6 flex flex-col gap-4 lg:col-span-1">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="flex flex-col gap-4 rounded-[30px] bg-[#333331] p-6 lg:col-span-1">
           <div className="flex flex-col gap-1">
-            <span className="text-xs uppercase tracking-wider text-muted">
+            <span className="text-xs uppercase tracking-wider text-[#8f8f8c]">
               Income
             </span>
-            <p className="text-4xl font-extrabold tracking-tight text-foreground">
+            <p className="text-4xl font-extrabold tracking-tight text-white">
               {monthIncome.toLocaleString(undefined, {
                 maximumFractionDigits: 2,
               })}
@@ -196,10 +206,10 @@ export default function AdminStats() {
               className={
                 "text-sm font-semibold " +
                 (pct == null
-                  ? "text-muted"
+                  ? "text-[#8f8f8c]"
                   : pct >= 0
-                    ? "text-green-600"
-                    : "text-red-500")
+                    ? "text-[#25D366]"
+                    : "text-red-400")
               }
             >
               {pct == null
@@ -211,7 +221,7 @@ export default function AdminStats() {
             <button
               type="button"
               onClick={() => adjust(-100)}
-              className="rounded-lg border border-border px-3 py-2 text-sm cursor-pointer hover:bg-surface-muted"
+              className="cursor-pointer rounded-full border border-white/15 px-3 py-2 text-sm text-white/80 hover:bg-white/5"
             >
               -100
             </button>
@@ -220,12 +230,12 @@ export default function AdminStats() {
               step="0.01"
               value={incomeDraft}
               onChange={(e) => setIncomeDraft(e.target.value)}
-              className="flex-1 rounded-lg border bg-background px-3 py-2 text-sm outline-none"
+              className="flex-1 rounded-xl bg-[#474744] px-3 py-2 text-sm text-white outline-none"
             />
             <button
               type="button"
               onClick={() => adjust(100)}
-              className="rounded-lg border border-border px-3 py-2 text-sm cursor-pointer hover:bg-surface-muted"
+              className="cursor-pointer rounded-full border border-white/15 px-3 py-2 text-sm text-white/80 hover:bg-white/5"
             >
               +100
             </button>
@@ -233,25 +243,25 @@ export default function AdminStats() {
           <button
             type="button"
             onClick={saveIncome}
-            className="rounded-lg bg-accent text-surface px-4 py-2 text-sm font-bold hover:bg-accent-hover cursor-pointer"
+            className="cursor-pointer rounded-full bg-[#D97757] px-4 py-2 text-sm font-bold text-white hover:bg-[#c96747]"
           >
             Save income
           </button>
         </div>
 
-        <div className="rounded-2xl border border-border bg-surface p-6 flex flex-col gap-3 lg:col-span-2">
-          <h2 className="text-lg font-bold">Daily visitors</h2>
+        <div className="flex flex-col gap-3 rounded-[30px] bg-[#333331] p-6 lg:col-span-2">
+          <h2 className="text-lg font-bold text-white">Daily visitors</h2>
           <div className="h-56 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={visitors}>
-                <CartesianGrid stroke="var(--border)" strokeDasharray="4 4" />
-                <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} width={32} />
-                <Tooltip />
+                <CartesianGrid stroke="#474744" strokeDasharray="4 4" />
+                <XAxis dataKey="date" tick={tickStyle} />
+                <YAxis allowDecimals={false} tick={tickStyle} width={32} />
+                <Tooltip contentStyle={tooltipStyle} />
                 <Line
                   type="monotone"
                   dataKey="count"
-                  stroke="var(--accent)"
+                  stroke="#D97757"
                   strokeWidth={2.5}
                   dot={false}
                 />
@@ -261,21 +271,21 @@ export default function AdminStats() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-surface p-6 flex flex-col gap-3">
-        <h2 className="text-lg font-bold">Button clicks (totals)</h2>
+      <div className="flex flex-col gap-3 rounded-[30px] bg-[#333331] p-6">
+        <h2 className="text-lg font-bold text-white">Button clicks (totals)</h2>
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={clickTotals} layout="vertical" margin={{ left: 24 }}>
-              <CartesianGrid stroke="var(--border)" strokeDasharray="4 4" />
-              <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
+              <CartesianGrid stroke="#474744" strokeDasharray="4 4" />
+              <XAxis type="number" allowDecimals={false} tick={tickStyle} />
               <YAxis
                 type="category"
                 dataKey="name"
                 width={140}
-                tick={{ fontSize: 11 }}
+                tick={tickStyle}
               />
-              <Tooltip />
-              <Bar dataKey="clicks" fill="var(--accent)" radius={[0, 6, 6, 0]} />
+              <Tooltip contentStyle={tooltipStyle} />
+              <Bar dataKey="clicks" fill="#D97757" radius={[0, 6, 6, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
