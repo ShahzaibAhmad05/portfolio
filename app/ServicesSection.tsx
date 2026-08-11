@@ -2,144 +2,165 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { DURATION, EASE, STAGGER, viewBelow } from "@/lib/motion";
+import { trackButtonClick } from "@/lib/stats";
 
-const services = [
-  { label: "SaaS", code: "saas", top: "4%", left: "14%", textSize: "text-4xl" },
+type Service = {
+  label: string;
+  code: string;
+  top: string;
+  left: string;
+  textClass: string;
+  delay: number;
+};
+
+const services: Service[] = [
+  {
+    label: "SaaS",
+    code: "saas",
+    top: "4%",
+    left: "24%",
+    textClass: "text-3xl sm:text-4xl lg:text-5xl px-8 py-5",
+    delay: 0,
+  },
   {
     label: "AI automation",
     code: "ai",
-    top: "0%",
-    left: "58%",
-    textSize: "text-3xl",
+    top: "2%",
+    left: "52%",
+    textClass: "text-2xl sm:text-3xl lg:text-4xl px-7 py-4",
+    delay: STAGGER,
+  },
+  {
+    label: "flutter apps",
+    code: "flutter",
+    top: "18%",
+    left: "8%",
+    textClass: "text-2xl sm:text-3xl px-7 py-4",
+    delay: STAGGER * 1.5,
   },
   {
     label: "code to exe",
     code: "exe",
-    top: "26%",
-    left: "24%",
-    textSize: "text-3xl",
+    top: "16%",
+    left: "36%",
+    textClass: "text-2xl sm:text-3xl lg:text-4xl px-7 py-4",
+    delay: STAGGER * 2,
   },
   {
     label: "python",
     code: "python",
-    top: "26%",
-    left: "56%",
-    textSize: "text-3xl",
+    top: "18%",
+    left: "62%",
+    textClass: "text-2xl sm:text-3xl px-7 py-4",
+    delay: STAGGER * 2.5,
   },
   {
     label: "chrome/firefox extensions",
     code: "extensions",
-    top: "48%",
-    left: "16%",
-    textSize: "text-4xl",
+    top: "34%",
+    left: "22%",
+    textClass: "text-2xl sm:text-3xl lg:text-4xl px-8 py-5",
+    delay: STAGGER * 3,
+  },
+  {
+    label: "electron apps",
+    code: "electron",
+    top: "42%",
+    left: "72%",
+    textClass: "text-xl sm:text-2xl lg:text-3xl px-6 py-4",
+    delay: STAGGER * 3.5,
   },
   {
     label: "desktop apps",
     code: "desktop",
-    top: "70%",
-    left: "16%",
-    textSize: "text-3xl",
+    top: "52%",
+    left: "20%",
+    textClass: "text-2xl sm:text-3xl px-7 py-4",
+    delay: STAGGER * 4,
   },
   {
     label: "computer vision",
     code: "cv",
-    top: "70%",
-    left: "56%",
-    textSize: "text-3xl",
+    top: "56%",
+    left: "50%",
+    textClass: "text-2xl sm:text-3xl lg:text-4xl px-7 py-4",
+    delay: STAGGER * 4.5,
+  },
+  {
+    label: "dotnet development",
+    code: "dotnet",
+    top: "68%",
+    left: "2%",
+    textClass: "text-xl sm:text-2xl lg:text-3xl px-6 py-3.5",
+    delay: STAGGER * 5,
   },
   {
     label: "figma web design",
     code: "figma",
-    top: "90%",
-    left: "32%",
-    textSize: "text-3xl",
+    top: "76%",
+    left: "28%",
+    textClass: "text-3xl sm:text-4xl lg:text-5xl px-10 py-5",
+    delay: STAGGER * 5.5,
   },
 ];
 
+function Bubble({ service }: { service: Service }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: DURATION, ease: EASE, delay: service.delay }}
+    >
+      <Link
+        href="#"
+        onClick={(e) => {
+          e.preventDefault();
+          trackButtonClick(service.code);
+        }}
+        className={
+          "inline-block rounded-full bg-surface font-normal text-foreground transition-colors hover:bg-surface/80 " +
+          service.textClass
+        }
+      >
+        {service.label}
+      </Link>
+    </motion.div>
+  );
+}
+
 export default function ServicesSection() {
   return (
-    <section className="flex flex-col px-8 md:px-28 bg-surface">
-      <div className="flex flex-col">
-        <h2 className="text-5xl mx-auto sm:text-7xl font-extrabold pt-4 pb-10 tracking-tighter text-foreground font-sans cursor-default">
-          Services I Provide
-        </h2>
+    <section className="flex flex-col">
+      <div className="border-y border-border bg-background px-6 py-10 sm:px-10 sm:py-14 lg:px-20">
+        <motion.h2
+          {...viewBelow}
+          className="text-center font-display text-[clamp(2.4rem,8vw,6.6rem)] leading-none text-foreground"
+        >
+          Featured Services
+        </motion.h2>
+      </div>
 
-        {/* stacked for mobile and scattered on desktop */}
-        <div className="flex flex-col items-center gap-3 md:hidden">
-          {services.map((service, idx) => (
-            <motion.div
-              key={service.code}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.4 }}
-              transition={{ duration: 0.5, delay: idx * 0.06 }}
-            >
-              <Link
-                href={`/chat?c=${service.code}`}
-                title="Click to chat on this service :)"
-                className={
-                  "block rounded-full bg-surface-muted px-7 py-4 font-semibold font-sans tracking-tight hover:bg-surface cursor-pointer " +
-                  service.textSize
-                }
-              >
-                {service.label}
-              </Link>
-            </motion.div>
+      <div className="bg-background-lighter px-6 py-14 sm:px-10 sm:py-20 lg:px-12">
+        <div className="mx-auto flex max-w-4xl flex-col items-center gap-4 md:hidden">
+          {services.map((service) => (
+            <Bubble key={service.code} service={service} />
           ))}
         </div>
-        <div className="relative hidden md:block h-[70vh] max-w-4xl mx-auto w-full">
-          {services.map((service, idx) => (
+
+        <div className="relative mx-auto hidden h-[78vh] max-w-5xl md:block">
+          {services.map((service) => (
             <div
               key={service.code}
               className="absolute"
               style={{ top: service.top, left: service.left }}
             >
-              <motion.div
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.5, delay: idx * 0.06 }}
-              >
-                <Link
-                  href={`/chat?c=${service.code}`}
-                  title="Click to chat on this service :)"
-                  className={
-                    "block rounded-full bg-surface-muted px-8 py-5 font-semibold font-sans tracking-tight hover:bg-surface cursor-pointer whitespace-nowrap " +
-                    service.textSize
-                  }
-                >
-                  {service.label}
-                </Link>
-              </motion.div>
+              <Bubble service={service} />
             </div>
           ))}
         </div>
       </div>
-
-      <hr className="border border-border-harder w-full mt-36 mb-28" />
-
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.6 }}
-        transition={{ duration: 0.7 }}
-        className="flex flex-col items-center gap-4 md:gap-8 pb-22"
-      >
-        <p className="text-4xl sm:text-5xl lg:text-7xl font-extrabold font-sans tracking-tighter text-foreground cursor-default">
-          Still Confused?
-        </p>
-        <div className="flex flex-col gap-1">
-          <Link
-            href="/chat?c=discuss"
-            className="bg-accent text-background py-5 sm:py-3 rounded-full text-[26px] sm:text-[40px] font-display font-medium hover:bg-accent-hover px-10 sm:px-16 text-center"
-          >
-            Discuss for FREE
-          </Link>
-          <p className="text-sm text-muted mx-auto">
-            I don&apos;t mind a friendly chat :)
-          </p>
-        </div>
-      </motion.div>
     </section>
   );
 }

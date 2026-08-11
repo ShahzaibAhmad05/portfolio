@@ -1,27 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  --deeper: #ffffff;
-  --background: #faf9f5;
-  --foreground: #2d2b26;
-  --surface: #ffffff;
-  --surface-muted: #f0eee6;
-  --border: #e6e3d9;
-  --border-harder: #d8d6cf;
-  --muted: #83807a;
+  /* dark (default — matches figma palette) */
   --accent: #d97757;
-  --accent-foreground: #ffffff;
-  --accent-hover: #c96747;
-  --error: #ff0000;
+  --accent-hover: #cd6e4f;
+  --background: #1c1c1b;
+  --background-light: #242423;
+  --background-lighter: #333331;
+  --surface: #40403d;
+  --foreground: #ffffff;
+  --foreground-dim: rgba(255, 255, 255, 0.7);
+  --foreground-dimmer: rgba(255, 255, 255, 0.6);
+  --border: #6b6b6b;
 }
 
-@keyframes nudge-x {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  50% {
-    transform: translateX(6px);
+@media (prefers-color-scheme: light) {
+  :root {
+    --accent: #d97757;
+    --accent-hover: #c96747;
+    --background: #f4f2ec;
+    --background-light: #ffffff;
+    --background-lighter: #ebe8e0;
+    --surface: #e0dcd2;
+    --foreground: #1c1c1b;
+    --foreground-dim: rgba(28, 28, 27, 0.7);
+    --foreground-dimmer: rgba(28, 28, 27, 0.55);
+    --border: #c4bfb4;
   }
 }
 
@@ -36,39 +40,19 @@
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-deeper: var(--deeper);
-  --color-foreground: var(--foreground);
-  --color-surface: var(--surface);
-  --color-surface-muted: var(--surface-muted);
-  --color-border: var(--border);
-  --color-border-harder: var(--border-harder);
-  --color-muted: var(--muted);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-error: var(--error);
+  --color-background: var(--background);
+  --color-background-light: var(--background-light);
+  --color-background-lighter: var(--background-lighter);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-foreground-dim: var(--foreground-dim);
+  --color-foreground-dimmer: var(--foreground-dimmer);
+  --color-border: var(--border);
   --font-sans: var(--font-be-vietnam-pro);
   --font-display: var(--font-bayon);
-  --animate-nudge-x: nudge-x 1s ease-in-out infinite;
   --animate-nudge-y: nudge-y 1.2s ease-in-out infinite;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --deeper: #1C1C1B;
-    --background: #242423;
-    --foreground: #ffffff;
-    --surface: #333331;
-    --surface-muted: #474745;
-    --border: #46453f;
-    --border-harder: #5d5c56;
-    --muted: #a8a5a0;
-    --accent: #d97757;
-    --accent-foreground: #262624;
-    --accent-hover: #cd6e4f;
-    --error: #dc0000;
-  }
 }
 
 body {

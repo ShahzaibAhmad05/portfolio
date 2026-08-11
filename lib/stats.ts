@@ -5,26 +5,25 @@ export function todayDate() {
 }
 
 export const BUTTON_LABELS: Record<string, string> = {
-  enter: "Enter Chat",
-  how: "Want to know How?",
-  discuss: "Discuss for FREE",
-  contact: "Contact Me",
+  discuss: "Discuss An Idea",
+  send_email: "Send an Email",
+  whatsapp: "WhatsApp",
+  discord: "Discord",
+  linkedin: "LinkedIn",
+  mail: "Email",
+  github: "GitHub",
   saas: "SaaS",
-  tkinter: "Python Tkinter / PyQt6 Apps",
-  exe: "Code to Exe",
-  extensions: "Browser Extensions",
-  ai: "AI Automation",
-  cv: "Computer Vision / OpenCV",
-  returning: "Returning visitor",
+  ai: "AI automation",
+  flutter: "flutter apps",
+  exe: "code to exe",
+  python: "python",
+  extensions: "chrome/firefox extensions",
+  electron: "electron apps",
+  desktop: "desktop apps",
+  cv: "computer vision",
+  dotnet: "dotnet development",
+  figma: "figma web design",
 };
-
-export function monthStart(d = new Date()) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
-}
-
-export function prevMonthStart(d = new Date()) {
-  return monthStart(new Date(d.getFullYear(), d.getMonth() - 1, 1));
-}
 
 export async function trackVisitor() {
   const today = todayDate();

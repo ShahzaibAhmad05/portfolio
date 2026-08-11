@@ -2,194 +2,174 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { createClient } from "@/lib/supabase/client";
+import { motion, useScroll, useTransform } from "framer-motion";
+import Icon from "@/components/Icon";
+import { fromAbove, fromLeft, fromRight, DURATION, EASE } from "@/lib/motion";
+import { trackButtonClick } from "@/lib/stats";
+
+const floatIcons = [
+  { src: "/react.svg", top: "4%", left: "3%", opacity: 0.12 },
+  { src: "/code.svg", top: "8%", left: "12%", opacity: 0.18 },
+  { src: "/database.svg", top: "3%", left: "25%", opacity: 0.15 },
+  { src: "/hash.svg", top: "4%", left: "37%", opacity: 0.2 },
+  { src: "/server.svg", top: "9%", left: "50%", opacity: 0.2 },
+  { src: "/layers.svg", top: "2%", left: "63%", opacity: 0.14 },
+  { src: "/gitBranch.svg", top: "3%", left: "78%", opacity: 0.12 },
+  { src: "/cloud.svg", top: "11%", left: "92%", opacity: 0.16 },
+];
+
+const socials = [
+  { src: "/icons/discord.svg", label: "Discord", code: "discord" },
+  { src: "/icons/whatsapp.svg", label: "WhatsApp", code: "whatsapp" },
+  { src: "/icons/mail.svg", label: "Email", code: "mail" },
+  { src: "/icons/linkedin.svg", label: "LinkedIn", code: "linkedin" },
+];
 
 export default function IntroSection() {
-  const ease = [0.22, 1, 0.36, 1] as const;
-  const fromRight = {
-    initial: { opacity: 0, x: 40 },
-    animate: { opacity: 1, x: 0 },
-    transition: { duration: 0.5, ease, delay: 0.2 },
-  };
-  const fromLeft = {
-    initial: { opacity: 0, x: -40 },
-    animate: { opacity: 1, x: 0 },
-    transition: { duration: 0.5, ease, delay: 0.2 },
-  };
-
-  async function loginWithGoogle() {
-    const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `/chat`,
-      },
-    });
-  }
+  const { scrollY } = useScroll();
+  const scrollCtaOpacity = useTransform(scrollY, [0, 120], [1, 0]);
+  const scrollCtaY = useTransform(scrollY, [0, 120], [0, 16]);
 
   return (
-    <section className="relative flex flex-col h-svh items-center justify-center overflow-hidden">
-      {/* floating small navbar */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease, delay: 0.2 }}
-        className="flex flex-row absolute top-5 left-5"
-      >
-        <button
-          type="button"
-          onClick={loginWithGoogle}
-          className="flex flex-row items-center gap-2 border border-border-harder my-1 pl-6 pr-14 py-2 rounded-[20px] bg-deeper cursor-pointer"
-        >
-          <svg
-            width="21"
-            height="22"
-            viewBox="0 0 27 28"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+    <section className="relative flex min-h-svh flex-col overflow-hidden bg-background-light">
+      {floatIcons.map((icon) => (
+        <div
+          key={icon.src + icon.left}
+          aria-hidden
+          className="pointer-events-none absolute hidden size-9 bg-foreground md:block"
+          style={{
+            top: icon.top,
+            left: icon.left,
+            opacity: icon.opacity,
+            maskImage: `url(${icon.src})`,
+            WebkitMaskImage: `url(${icon.src})`,
+            maskSize: "contain",
+            WebkitMaskSize: "contain",
+            maskRepeat: "no-repeat",
+            WebkitMaskRepeat: "no-repeat",
+            maskPosition: "center",
+            WebkitMaskPosition: "center",
+          }}
+        />
+      ))}
+
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-0 top-[13%] h-[42%] w-[58%] max-w-[832px] rounded-full bg-[radial-gradient(circle_at_center,rgba(185,185,185,0.28)_0%,rgba(185,185,185,0)_70%)]"
+      />
+
+      <div className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-1 flex-col justify-center px-6 pb-24 pt-16 sm:px-10 lg:flex-row lg:items-end lg:justify-between lg:px-20 lg:pb-28 lg:pt-20">
+        <div className="flex max-w-xl flex-col lg:max-w-[620px]">
+          <motion.div {...fromAbove} className="relative">
+            <p className="font-display text-[clamp(2rem,5vw,3.7rem)] leading-none text-foreground">
+              This is
+            </p>
+            <h1 className="font-display text-[clamp(4.5rem,18vw,12.8rem)] leading-[0.85] text-accent">
+              Shahzaib
+            </h1>
+            <Link
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                trackButtonClick("github");
+              }}
+              aria-label="GitHub"
+              className="absolute right-0 top-[18%] hidden opacity-90 transition-opacity hover:opacity-100 sm:block lg:right-[-0.5rem] lg:top-[22%]"
+            >
+              <Icon src="/icons/github.svg" size={40} />
+            </Link>
+          </motion.div>
+
+          <motion.p
+            {...fromLeft}
+            transition={{ duration: DURATION, ease: EASE, delay: 0.12 }}
+            className="mt-4 max-w-[34rem] text-[clamp(1.15rem,2.4vw,2.7rem)] font-black leading-tight text-foreground"
           >
-            <path
-              d="M26.7607 11.477C26.9213 12.4167 27.0013 13.3687 27 14.3225C27 18.5818 25.5023 22.1832 22.8959 24.6209H22.8994C20.6201 26.761 17.487 28 13.772 28C10.1194 28 6.61647 26.5251 4.03372 23.8996C1.45097 21.2742 0 17.7134 0 14.0005C0 10.2876 1.45097 6.72672 4.03372 4.10129C6.61647 1.47587 10.1194 0.000923771 13.772 0.000923771C17.1908 -0.039777 20.4925 1.26584 22.9854 3.6443L19.0535 7.64117C17.6322 6.26392 15.7354 5.50973 13.772 5.54124C10.1792 5.54124 7.127 8.00516 6.03902 11.323C5.46215 13.0616 5.46215 14.9445 6.03902 16.6831H6.04418C7.13733 19.9958 10.1844 22.4597 13.7772 22.4597C15.6329 22.4597 17.227 21.9767 18.4631 21.1227H18.4579C19.1756 20.6394 19.7895 20.0133 20.2626 19.2821C20.7357 18.551 21.0582 17.7299 21.2106 16.8686H13.772V11.4788H26.7607V11.477Z"
-              fill="white"
-            />
-          </svg>
-          <span className="text-lg sm:text-xl lg:text-xl">login</span>
-        </button>
-        <Link
-          href="/chat"
-          className="px-6 rounded-2xl bg-accent text-background font-bold -ml-10 text-lg sm:text-xl lg:text-xl flex items-center cursor-pointer z-1"
-        >
-          Chat
-        </Link>
-      </motion.div>
-      {/* background glow -> figma generated */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, ease, delay: 0.2 }}
-        className="flex inset-0 absolute mt-[26svh] md:mt-[27svh] md:ml-[15svh] -z-1"
-      >
-        <svg
-          width="1000"
-          height="400"
-          viewBox="0 0 1285 587"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <ellipse
-            cx="642.5"
-            cy="293.5"
-            rx="642.5"
-            ry="293.5"
-            fill="url(#paint0_radial_5_32)"
-          />
-          <defs>
-            <radialGradient
-              id="paint0_radial_5_32"
-              cx="0"
-              cy="0"
-              r="1"
-              gradientUnits="userSpaceOnUse"
-              gradientTransform="translate(642.5 293.5) rotate(90) scale(293.5 642.5)"
-            >
-              <stop stopColor="#B9B9B9" stopOpacity="0.28" />
-              <stop offset="1" stopColor="#B9B9B9" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-        </svg>
-      </motion.div>
-      {/* darken effect for pfp -> figma generated */}
-      <motion.div
-        {...fromRight}
-        className="absolute inset-0 z-3 mt-[52svh] ml-[6svh] pointer-events-none hidden md:block"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="1055"
-          height="304"
-          viewBox="0 0 1055 304"
-          fill="none"
-        >
-          <ellipse
-            cx="829.5"
-            cy="152"
-            rx="829.5"
-            ry="152"
-            fill="url(#paint0_radial_10_389)"
-          />
-          <defs>
-            <radialGradient
-              id="paint0_radial_10_389"
-              cx="0"
-              cy="0"
-              r="1"
-              gradientUnits="userSpaceOnUse"
-              gradientTransform="translate(829.5 152) rotate(90) scale(152 829.5)"
-            >
-              <stop stopColor="#242423" stopOpacity="0.52" />
-              <stop offset="1" stopColor="#242423" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-        </svg>
-      </motion.div>
-      {/* header and picture */}
-      <div className="flex flex-row items-end justify-center md:mb-[20svh] relative">
-        <h1 className="relative text-foreground cursor-default leading-[0.95] md:leading-[0.78] font-normal">
+            Helping Founders Build{" "}
+            <span className="text-accent">High-Quality</span> Software Free of
+            AI slop
+          </motion.p>
+
           <motion.div
             {...fromLeft}
-            className="relative z-0 flex flex-col"
+            transition={{ duration: DURATION, ease: EASE, delay: 0.22 }}
+            className="mt-8 flex flex-col gap-4 sm:mt-10"
           >
-            <span className="font-display text-[30px] sm:text-[40px] md:text-[77px]">Building Software</span>
-            <span className="font-display text-accent text-[60px] sm:text-[78px] md:text-[170px] -mt-1.5 sm:-mt-2 md:mt-0">
-              3XBETTER
-            </span>
-            <span
-              className="font-display text-[38px] sm:text-[48px] md:text-[110px] -mt-2 sm:-mt-2.5 md:-mt-1.5"
-              aria-hidden
-            >
-              than AI today
-            </span>
+            <div className="flex items-center gap-3">
+              {socials.map((s) => (
+                <Link
+                  key={s.code}
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    trackButtonClick(s.code);
+                  }}
+                  aria-label={s.label}
+                  className="opacity-90 transition-opacity hover:opacity-100"
+                >
+                  <Icon src={s.src} size={20} />
+                </Link>
+              ))}
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-6">
+              <Link
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  trackButtonClick("discuss");
+                }}
+                className="inline-flex w-fit items-center justify-center rounded-[21px] border border-[#494545] bg-accent px-6 py-3.5 text-base font-medium text-black transition-colors hover:bg-accent-hover sm:text-lg"
+              >
+                Discuss An Idea
+              </Link>
+              <div className="flex flex-col">
+                <span className="text-sm text-foreground sm:text-base">
+                  Contact me on WhatsApp
+                </span>
+                <Link
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    trackButtonClick("whatsapp");
+                  }}
+                  className="font-display text-[clamp(2rem,6vw,4.8rem)] leading-none tracking-tight text-foreground"
+                >
+                  +923184299873
+                </Link>
+              </div>
+            </div>
           </motion.div>
-          <motion.div
-            {...fromLeft}
-            className="absolute bottom-0 left-0 z-4 font-display text-[38px] sm:text-[48px] md:text-[110px]"
-          >
-            than AI today
-          </motion.div>
-        </h1>
-        <motion.div {...fromRight} className="relative z-1 flex md:-ml-27">
+        </div>
+
+        <motion.div
+          {...fromRight}
+          transition={{ duration: DURATION, ease: EASE, delay: 0.15 }}
+          className="relative mt-10 hidden shrink-0 lg:mt-0 lg:block"
+        >
           <Image
             src="/pfp.png"
-            alt="profile picture"
+            alt="Shahzaib"
             width={602}
             height={702}
             priority
-            className="hidden lg:block shrink-0 lg:w-110 mb-2"
+            className="relative z-10 w-[min(38vw,602px)]"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute bottom-[-4%] left-[-35%] z-20 h-[45%] w-[160%] bg-[radial-gradient(ellipse_at_center,var(--background-light)_20%,transparent_70%)]"
           />
         </motion.div>
       </div>
-      {/* scroll CTA */}
+
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, ease, delay: 0.2 }}
-        className="absolute bottom-5 sm:bottom-7 flex flex-col items-center text-foreground cursor-default"
+        style={{ opacity: scrollCtaOpacity, y: scrollCtaY }}
+        className="pointer-events-none absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-1 text-foreground"
       >
-        <span className="text-lg md:text-sm tracking-wider uppercase">Scroll</span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="size-6 md:size-5 animate-nudge-y"
-          aria-hidden
-        >
-          <path d="M12 5v14M6 13l6 6 6-6" />
-        </svg>
+        <span className="text-sm tracking-[0.12em] uppercase sm:text-base">
+          SCROLL
+        </span>
+        <Icon src="/icons/arrow-down.svg" size={24} className="animate-nudge-y" />
       </motion.div>
     </section>
   );

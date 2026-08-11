@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro, Bayon } from "next/font/google";
+import LenisProvider from "@/components/LenisProvider";
+import "lenis/dist/lenis.css";
 import "./globals.css";
 
 const beVietnamPro = Be_Vietnam_Pro({
   variable: "--font-be-vietnam-pro",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
   display: "swap",
   preload: true,
   adjustFontFallback: true,
@@ -21,7 +23,8 @@ const bayon = Bayon({
 
 export const metadata: Metadata = {
   title: "Shahzaib Ahmad Shahid | Software Engineer",
-  description: "3+ Years Of Building Software Faster Than AI At 0.1X the API Costs.",
+  description:
+    "Helping Founders Build High-Quality Software Free of AI slop.",
 };
 
 export default function RootLayout({
@@ -35,7 +38,7 @@ export default function RootLayout({
       className={`${beVietnamPro.variable} ${bayon.variable} h-full antialiased`}
     >
       <body className={`${beVietnamPro.className} min-h-full`}>
-        {children}
+        <LenisProvider>{children}</LenisProvider>
       </body>
     </html>
   );
