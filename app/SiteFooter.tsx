@@ -3,7 +3,6 @@
 import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import { CONTACT } from "@/lib/content";
-import { trackButtonClick } from "@/lib/stats";
 
 const LINKS = [
   { label: "GitHub", href: CONTACT.github, code: "github" },
@@ -14,7 +13,7 @@ const LINKS = [
 
 export default function SiteFooter() {
   return (
-    <footer className="overflow-hidden border-t border-hairline bg-background">
+    <footer data-section="footer" className="overflow-hidden border-t border-hairline bg-background">
       <Reveal className="mx-auto flex w-full max-w-[1208px] flex-wrap items-start justify-between gap-8 px-6 pt-[clamp(56px,6vw,88px)]">
         <div className="flex flex-col gap-2">
           <span className="text-[15px] font-medium">Shahzaib Ahmad Shahid</span>
@@ -27,7 +26,7 @@ export default function SiteFooter() {
             <Link
               key={link.label}
               href={link.href}
-              onClick={() => trackButtonClick(link.code)}
+              data-track={`footer-${link.code}`}
               className="text-sm text-foreground-dim transition-colors duration-200 hover:text-foreground"
             >
               {link.label}

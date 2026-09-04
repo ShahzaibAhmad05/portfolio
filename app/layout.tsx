@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro, Bayon } from "next/font/google";
+import AnalyticsProvider from "@/components/AnalyticsProvider";
 import LenisProvider from "@/components/LenisProvider";
 import "lenis/dist/lenis.css";
 import "./globals.css";
@@ -39,6 +40,7 @@ export default function RootLayout({
     >
       <body className={`${beVietnamPro.className} min-h-full`}>
         <LenisProvider>{children}</LenisProvider>
+        <AnalyticsProvider />
       </body>
     </html>
   );

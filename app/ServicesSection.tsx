@@ -4,6 +4,7 @@ import { SERVICES } from "@/lib/content";
 export default function ServicesSection() {
   return (
     <section
+      data-section="services"
       id="services"
       className="scroll-mt-[68px] border-t border-hairline bg-background"
     >

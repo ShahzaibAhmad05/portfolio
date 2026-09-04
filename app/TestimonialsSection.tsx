@@ -4,7 +4,7 @@ import { TESTIMONIALS } from "@/lib/content";
 
 export default function TestimonialsSection() {
   return (
-    <section className="border-t border-hairline bg-background">
+    <section data-section="testimonials" className="border-t border-hairline bg-background">
       <div className="mx-auto w-full max-w-[1208px] px-6 py-[clamp(80px,9vw,128px)]">
         <Reveal className="mb-[clamp(36px,4vw,56px)] flex flex-col gap-3">
           <span className="text-[11px] font-medium tracking-[0.16em] text-accent uppercase">

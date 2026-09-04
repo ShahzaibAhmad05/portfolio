@@ -23,7 +23,7 @@ export default function CountUp({ to, suffix = "", delay = 0, className }: Count
   const inView = useInView(ref, { once: true, amount: 0.6 });
   const reduced = useReducedMotion();
   const count = useMotionValue(to);
-  const label = useTransform(count, (value) => Math.round(value) + suffix);
+  const label = useTransform(count, (value: number) => Math.round(value) + suffix);
 
   useEffect(() => {
     if (!inView || reduced) return;
