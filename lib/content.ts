@@ -5,6 +5,7 @@ export type CaseStudy = {
   summary: string;
   tech: string[];
   thumbnail: string;
+  image?: string;
   detail: { label: string; body: string }[];
   links: { label: string; href: string }[];
 };
@@ -18,6 +19,7 @@ export const CASE_STUDIES: CaseStudy[] = [
       "A digital logic circuit simulator. Draw a circuit on paper, photograph it, and it becomes a running simulation. No LLMs, no paid APIs.",
     tech: ["C#", ".NET 9", "Avalonia", "YOLO", "OpenCV", "xunit"],
     thumbnail: "simulator canvas",
+    image: "/work/iris.webp",
     detail: [
       {
         label: "The problem",
@@ -66,6 +68,7 @@ export const CASE_STUDIES: CaseStudy[] = [
       "A command-line replacement for `ls` that reads folder structures and packages an entire codebase for an LLM prompt. Open source, published on PyPI.",
     tech: ["Python", "PyPI", "CLI", "Open source"],
     thumbnail: "terminal output",
+    image: "/work/gitree.webp",
     detail: [
       {
         label: "The problem",

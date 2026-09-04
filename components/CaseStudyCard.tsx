@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import CodeText from "@/components/CodeText";
@@ -96,10 +97,22 @@ export default function CaseStudyCard({
           </div>
         </div>
 
-        <div className="hatch flex min-h-[260px] items-center justify-center border-l border-white/[0.06] p-6">
-          <span className="rounded-md bg-background-light px-3.5 py-2 text-center font-mono text-[11px] tracking-[0.08em] text-foreground-muted">
-            {study.thumbnail}
-          </span>
+        <div className="relative flex min-h-[260px] items-center justify-center overflow-hidden border-l border-white/[0.06]">
+          {study.image ? (
+            <Image
+              src={study.image}
+              alt={`${study.title} preview`}
+              fill
+              sizes="(min-width: 768px) 50vw, 100vw"
+              className="object-cover"
+            />
+          ) : (
+            <div className="hatch flex h-full w-full items-center justify-center p-6">
+              <span className="rounded-md bg-background-light px-3.5 py-2 text-center font-mono text-[11px] tracking-[0.08em] text-foreground-muted">
+                {study.thumbnail}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </Reveal>

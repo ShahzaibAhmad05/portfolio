@@ -6,6 +6,10 @@ import Reveal from "@/components/Reveal";
 import { CONTACT } from "@/lib/content";
 import { trackButtonClick } from "@/lib/stats";
 
+const WEB3FORMS_ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
+
+type SendState = "idle" | "pending" | "success" | "error";
+
 const FIELD =
   "w-full rounded-xl border border-white/[0.11] bg-background px-4 py-[15px] text-[15px] font-light text-foreground outline-none transition-colors duration-200 placeholder:text-foreground-faint focus:border-accent";
 
@@ -13,21 +17,55 @@ const LABEL =
   "text-[11px] font-medium tracking-[0.14em] text-foreground-dim uppercase";
 
 export default function ContactSection() {
-  const [sent, setSent] = useState(false);
+  const [state, setState] = useState<SendState>("idle");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const idea = String(form.get("idea") ?? "");
-    const from = String(form.get("contact") ?? "");
-    const body = `${idea}\n\nReach me at: ${from}`;
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const idea = String(data.get("idea") ?? "");
+    const contact = String(data.get("contact") ?? "");
 
     trackButtonClick("send_email");
-    setSent(true);
-    window.location.href = `mailto:${CONTACT.email}?subject=${encodeURIComponent(
-      "An idea for you",
-    )}&body=${encodeURIComponent(body)}`;
+
+    if (!WEB3FORMS_ACCESS_KEY) {
+      const body = `${idea}\n\nReach me at: ${contact}`;
+      window.location.href = `mailto:${CONTACT.email}?subject=${encodeURIComponent(
+        "An idea for you",
+      )}&body=${encodeURIComponent(body)}`;
+      return;
+    }
+
+    setState("pending");
+    try {
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_ACCESS_KEY,
+          subject: "An idea for you, from the portfolio site",
+          idea,
+          contact,
+        }),
+      });
+      const result = await res.json();
+      if (res.ok && result.success) {
+        setState("success");
+        form.reset();
+      } else {
+        setState("error");
+      }
+    } catch {
+      setState("error");
+    }
   }
+
+  const buttonLabel = {
+    idle: "Send an email",
+    pending: "Sending…",
+    success: "Sent, I'll reply shortly",
+    error: "Something went wrong, try again",
+  }[state];
 
   return (
     <section
@@ -106,10 +144,20 @@ export default function ContactSection() {
           </label>
           <button
             type="submit"
-            className="cursor-pointer self-start rounded-full bg-accent px-[30px] py-[15px] text-[15px] font-medium text-background transition-colors duration-200 hover:bg-accent-hover"
+            disabled={state === "pending"}
+            className="cursor-pointer self-start rounded-full bg-accent px-[30px] py-[15px] text-[15px] font-medium text-background transition-colors duration-200 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {sent ? "Sent, I'll reply shortly" : "Send an email"}
+            {buttonLabel}
           </button>
+          {state === "error" ? (
+            <p className="text-sm font-light text-foreground-dim">
+              That did not go through. You can retry, or email me directly at{" "}
+              <Link href={`mailto:${CONTACT.email}`} className="text-accent hover:underline">
+                {CONTACT.email}
+              </Link>
+              .
+            </p>
+          ) : null}
         </Reveal>
       </div>
     </section>
