@@ -7,7 +7,7 @@ import { trackButtonClick } from "@/lib/stats";
 
 const LINKS = [
   { label: "GitHub", href: CONTACT.github, code: "github" },
-  { label: "LinkedIn", href: "#", code: "linkedin" },
+  { label: "LinkedIn", href: CONTACT.linkedin, code: "linkedin" },
   { label: "WhatsApp", href: CONTACT.whatsapp, code: "whatsapp" },
   { label: "Email", href: `mailto:${CONTACT.email}`, code: "mail" },
 ];

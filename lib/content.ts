@@ -171,4 +171,5 @@ export const CONTACT = {
   email: "shahzaibahmad6789@gmail.com",
   whatsapp: "https://wa.me/923184299873",
   github: "https://github.com/ShahzaibAhmad05",
+  linkedin: "https://www.linkedin.com/in/shahzaibahmad05/",
 };
