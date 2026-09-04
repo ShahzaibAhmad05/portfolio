@@ -24,6 +24,7 @@ const FLUSH_EVERY_MS = 5000;
 const FLUSH_AT_COUNT = 20;
 const MAX_BATCH = 40;
 const SCROLL_MARKS = [25, 50, 75, 90, 100];
+const SCROLL_THROTTLE_MS = 200;
 const RAGE_WINDOW_MS = 700;
 const RAGE_RADIUS_PX = 32;
 const RAGE_CLICKS = 3;
@@ -228,7 +229,7 @@ export function startAnalytics() {
   const seenSections = new Set<string>();
   const enteredAt = new Map<string, number>();
   let rage = { name: "", x: 0, y: 0, at: 0, count: 0 };
-  let scrollQueued = false;
+  let scrollTimer: ReturnType<typeof setTimeout> | null = null;
 
   track("page_view", {
     props: {
@@ -238,22 +239,26 @@ export function startAnalytics() {
     },
   });
 
-  const onScroll = () => {
-    if (scrollQueued) return;
-    scrollQueued = true;
-    requestAnimationFrame(() => {
-      scrollQueued = false;
-      const height = document.documentElement.scrollHeight - innerHeight;
-      const pct = height <= 0 ? 100 : Math.round((scrollY / height) * 100);
-      const reached = Math.min(100, Math.max(0, pct));
-      if (reached > deepest) deepest = reached;
-      for (const mark of SCROLL_MARKS) {
-        if (reached >= mark && !marked.has(mark)) {
-          marked.add(mark);
-          track("scroll_depth", { value: mark });
-        }
+  const readScroll = () => {
+    scrollTimer = null;
+    const height = document.documentElement.scrollHeight - innerHeight;
+    const pct = height <= 0 ? 100 : Math.round((scrollY / height) * 100);
+    const reached = Math.min(100, Math.max(0, pct));
+    if (reached > deepest) deepest = reached;
+    for (const mark of SCROLL_MARKS) {
+      if (reached >= mark && !marked.has(mark)) {
+        marked.add(mark);
+        track("scroll_depth", { value: mark });
       }
-    });
+    }
+  };
+
+  // setTimeout rather than requestAnimationFrame: rAF never runs in a
+  // background tab, which would strand the throttle and lose the whole
+  // session's scroll data for anyone who opens the site in one.
+  const onScroll = () => {
+    if (scrollTimer) return;
+    scrollTimer = setTimeout(readScroll, SCROLL_THROTTLE_MS);
   };
 
   const onClick = (event: MouseEvent) => {
@@ -397,7 +402,7 @@ export function startAnalytics() {
   document.addEventListener("visibilitychange", onVisibility);
   addEventListener("pagehide", onLeave);
   timer = setInterval(flush, FLUSH_EVERY_MS);
-  onScroll();
+  readScroll();
 
   return () => {
     observer.disconnect();
@@ -411,6 +416,8 @@ export function startAnalytics() {
     removeEventListener("pagehide", onLeave);
     if (timer) clearInterval(timer);
     timer = null;
+    if (scrollTimer) clearTimeout(scrollTimer);
+    scrollTimer = null;
     closeSections();
     flush();
     live = false;
