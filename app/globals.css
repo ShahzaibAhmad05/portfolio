@@ -1,42 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  /* dark (default — matches figma palette) */
+  color-scheme: dark;
+
+  /* palette — seller-site design */
   --accent: #d97757;
-  --accent-hover: #cd6e4f;
+  --accent-hover: #e9967a;
   --background: #1c1c1b;
   --background-light: #242423;
-  --background-lighter: #333331;
+  --card: #2a2a28;
   --surface: #40403d;
   --foreground: #ffffff;
-  --foreground-dim: rgba(255, 255, 255, 0.7);
-  --foreground-dimmer: rgba(255, 255, 255, 0.6);
-  --border: #6b6b6b;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --accent: #d97757;
-    --accent-hover: #c96747;
-    --background: #f4f2ec;
-    --background-light: #ffffff;
-    --background-lighter: #ebe8e0;
-    --surface: #e0dcd2;
-    --foreground: #1c1c1b;
-    --foreground-dim: rgba(28, 28, 27, 0.7);
-    --foreground-dimmer: rgba(28, 28, 27, 0.55);
-    --border: #c4bfb4;
-  }
-}
-
-@keyframes nudge-y {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(6px);
-  }
+  --foreground-body: #c4c4c0;
+  --foreground-dim: #a8a8a4;
+  --foreground-muted: #8a8a86;
+  --foreground-faint: #6b6b6b;
+  --hairline: rgba(255, 255, 255, 0.07);
+  --hairline-strong: rgba(255, 255, 255, 0.09);
 }
 
 @theme inline {
@@ -44,19 +24,38 @@
   --color-accent-hover: var(--accent-hover);
   --color-background: var(--background);
   --color-background-light: var(--background-light);
-  --color-background-lighter: var(--background-lighter);
+  --color-card: var(--card);
   --color-surface: var(--surface);
   --color-foreground: var(--foreground);
+  --color-foreground-body: var(--foreground-body);
   --color-foreground-dim: var(--foreground-dim);
-  --color-foreground-dimmer: var(--foreground-dimmer);
-  --color-border: var(--border);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-faint: var(--foreground-faint);
+  --color-hairline: var(--hairline);
+  --color-hairline-strong: var(--hairline-strong);
   --font-sans: var(--font-be-vietnam-pro);
   --font-display: var(--font-bayon);
-  --animate-nudge-y: nudge-y 1.2s ease-in-out infinite;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-be-vietnam-pro), ui-sans-serif, system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--background);
+}
+
+/* the diagonal hatch behind each case-study thumbnail */
+.hatch {
+  background: repeating-linear-gradient(
+    135deg,
+    #333331 0px,
+    #333331 9px,
+    #2e2e2c 9px,
+    #2e2e2c 18px
+  );
 }

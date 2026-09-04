@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactLenis } from "lenis/react";
+import { MotionConfig } from "framer-motion";
 import type { ReactNode } from "react";
 
 const options = {
@@ -9,13 +10,13 @@ const options = {
   smoothWheel: true,
   touchMultiplier: 1.4,
   wheelMultiplier: 0.9,
-  autoRaf: true,
+  anchors: { offset: -68 },
 };
 
 export default function LenisProvider({ children }: { children: ReactNode }) {
   return (
     <ReactLenis root options={options}>
-      {children}
+      <MotionConfig reducedMotion="user">{children}</MotionConfig>
     </ReactLenis>
   );
 }

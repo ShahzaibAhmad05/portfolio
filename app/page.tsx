@@ -1,25 +1,35 @@
 "use client";
 
 import { useEffect } from "react";
-import IntroSection from "./IntroSection";
-import StatsSection from "./StatsSection";
-import ReviewsSection from "./ReviewsSection";
+import ApproachSection from "./ApproachSection";
+import ContactSection from "./ContactSection";
+import HeroSection from "./HeroSection";
 import ServicesSection from "./ServicesSection";
-import Footer from "./Footer";
+import SiteFooter from "./SiteFooter";
+import SiteHeader from "./SiteHeader";
+import StatsSection from "./StatsSection";
+import TestimonialsSection from "./TestimonialsSection";
+import WorkSection from "./WorkSection";
 import { trackVisitor } from "@/lib/stats";
 
 export default function Home() {
   useEffect(() => {
-    trackVisitor();
+    trackVisitor().catch(() => {});
   }, []);
 
   return (
-    <main className="flex flex-col">
-      <IntroSection />
-      <StatsSection />
-      <ReviewsSection />
-      <ServicesSection />
-      <Footer />
-    </main>
+    <>
+      <SiteHeader />
+      <main className="flex flex-col">
+        <HeroSection />
+        <StatsSection />
+        <WorkSection />
+        <ServicesSection />
+        <ApproachSection />
+        <TestimonialsSection />
+        <ContactSection />
+      </main>
+      <SiteFooter />
+    </>
   );
 }

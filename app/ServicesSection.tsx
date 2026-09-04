@@ -1,163 +1,42 @@
-"use client";
-
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { DURATION, EASE, STAGGER, viewBelow } from "@/lib/motion";
-import { trackButtonClick } from "@/lib/stats";
-
-type Service = {
-  label: string;
-  code: string;
-  top: string;
-  left: string;
-  textClass: string;
-  delay: number;
-};
-
-const services: Service[] = [
-  {
-    label: "SaaS",
-    code: "saas",
-    top: "4%",
-    left: "24%",
-    textClass: "text-3xl sm:text-4xl lg:text-5xl px-8 py-5",
-    delay: 0,
-  },
-  {
-    label: "AI automation",
-    code: "ai",
-    top: "2%",
-    left: "52%",
-    textClass: "text-2xl sm:text-3xl lg:text-4xl px-7 py-4",
-    delay: STAGGER,
-  },
-  {
-    label: "flutter apps",
-    code: "flutter",
-    top: "18%",
-    left: "8%",
-    textClass: "text-2xl sm:text-3xl px-7 py-4",
-    delay: STAGGER * 1.5,
-  },
-  {
-    label: "code to exe",
-    code: "exe",
-    top: "16%",
-    left: "36%",
-    textClass: "text-2xl sm:text-3xl lg:text-4xl px-7 py-4",
-    delay: STAGGER * 2,
-  },
-  {
-    label: "python",
-    code: "python",
-    top: "18%",
-    left: "62%",
-    textClass: "text-2xl sm:text-3xl px-7 py-4",
-    delay: STAGGER * 2.5,
-  },
-  {
-    label: "chrome/firefox extensions",
-    code: "extensions",
-    top: "34%",
-    left: "22%",
-    textClass: "text-2xl sm:text-3xl lg:text-4xl px-8 py-5",
-    delay: STAGGER * 3,
-  },
-  {
-    label: "electron apps",
-    code: "electron",
-    top: "42%",
-    left: "72%",
-    textClass: "text-xl sm:text-2xl lg:text-3xl px-6 py-4",
-    delay: STAGGER * 3.5,
-  },
-  {
-    label: "desktop apps",
-    code: "desktop",
-    top: "52%",
-    left: "20%",
-    textClass: "text-2xl sm:text-3xl px-7 py-4",
-    delay: STAGGER * 4,
-  },
-  {
-    label: "computer vision",
-    code: "cv",
-    top: "56%",
-    left: "50%",
-    textClass: "text-2xl sm:text-3xl lg:text-4xl px-7 py-4",
-    delay: STAGGER * 4.5,
-  },
-  {
-    label: "dotnet development",
-    code: "dotnet",
-    top: "68%",
-    left: "2%",
-    textClass: "text-xl sm:text-2xl lg:text-3xl px-6 py-3.5",
-    delay: STAGGER * 5,
-  },
-  {
-    label: "figma web design",
-    code: "figma",
-    top: "76%",
-    left: "28%",
-    textClass: "text-3xl sm:text-4xl lg:text-5xl px-10 py-5",
-    delay: STAGGER * 5.5,
-  },
-];
-
-function Bubble({ service }: { service: Service }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: DURATION, ease: EASE, delay: service.delay }}
-    >
-      <Link
-        href="#"
-        onClick={(e) => {
-          e.preventDefault();
-          trackButtonClick(service.code);
-        }}
-        className={
-          "inline-block rounded-full bg-surface font-normal text-foreground transition-colors hover:bg-surface/80 " +
-          service.textClass
-        }
-      >
-        {service.label}
-      </Link>
-    </motion.div>
-  );
-}
+import Reveal from "@/components/Reveal";
+import { SERVICES } from "@/lib/content";
 
 export default function ServicesSection() {
   return (
-    <section className="flex flex-col">
-      <div className="border-y border-border bg-background px-6 py-10 sm:px-10 sm:py-14 lg:px-20">
-        <motion.h2
-          {...viewBelow}
-          className="text-center font-display text-[clamp(2.4rem,8vw,6.6rem)] leading-none text-foreground"
-        >
-          Featured Services
-        </motion.h2>
-      </div>
+    <section
+      id="services"
+      className="scroll-mt-[68px] border-t border-hairline bg-background"
+    >
+      <div className="mx-auto w-full max-w-[1208px] px-6 py-[clamp(80px,9vw,128px)]">
+        <Reveal className="mb-[clamp(36px,4vw,56px)] flex max-w-[56ch] flex-col gap-3">
+          <span className="text-[11px] font-medium tracking-[0.16em] text-accent uppercase">
+            Services
+          </span>
+          <h2 className="font-display text-[clamp(38px,4.6vw,60px)] leading-none tracking-[0.01em]">
+            WHAT I TAKE ON
+          </h2>
+        </Reveal>
 
-      <div className="bg-background-lighter px-6 py-14 sm:px-10 sm:py-20 lg:px-12">
-        <div className="mx-auto flex max-w-4xl flex-col items-center gap-4 md:hidden">
-          {services.map((service) => (
-            <Bubble key={service.code} service={service} />
-          ))}
-        </div>
-
-        <div className="relative mx-auto hidden h-[78vh] max-w-5xl md:block">
-          {services.map((service) => (
-            <div
-              key={service.code}
-              className="absolute"
-              style={{ top: service.top, left: service.left }}
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(272px,1fr))] gap-5">
+          {SERVICES.map((service, i) => (
+            <Reveal
+              key={service.number}
+              delay={i * 90}
+              className="flex flex-col gap-3.5 rounded-[18px] border border-white/[0.08] bg-background-light p-[34px] transition-colors duration-200 hover:border-accent/40"
             >
-              <Bubble service={service} />
-            </div>
+              <span className="font-display text-[30px] leading-none text-accent">
+                {service.number}
+              </span>
+              <h3 className="text-[21px] leading-[1.25] font-medium">
+                {service.title}
+              </h3>
+              <p className="text-[15px] font-light leading-[1.65] text-foreground-dim text-pretty">
+                {service.body}
+              </p>
+              <span className="mt-auto border-t border-hairline pt-3.5 text-xs text-foreground-faint">
+                {service.stack}
+              </span>
+            </Reveal>
           ))}
         </div>
       </div>

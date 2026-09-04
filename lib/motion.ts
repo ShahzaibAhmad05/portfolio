@@ -1,54 +1,14 @@
 export const EASE = [0.22, 1, 0.36, 1] as const;
-export const DURATION = 0.55;
-export const STAGGER = 0.08;
+export const DURATION = 0.62;
 
-export const fade = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1 },
-  transition: { duration: DURATION, ease: EASE },
-};
+/** Distance each direction travels before settling. */
+export const OFFSET = {
+  up: { y: 28 },
+  down: { y: -28 },
+  left: { x: -40 },
+  right: { x: 40 },
+} as const;
 
-export const fromAbove = {
-  initial: { opacity: 0, y: -36 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: DURATION, ease: EASE },
-};
+export type Direction = keyof typeof OFFSET;
 
-export const fromBelow = {
-  initial: { opacity: 0, y: 36 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: DURATION, ease: EASE },
-};
-
-export const fromLeft = {
-  initial: { opacity: 0, x: -40 },
-  animate: { opacity: 1, x: 0 },
-  transition: { duration: DURATION, ease: EASE },
-};
-
-export const fromRight = {
-  initial: { opacity: 0, x: 40 },
-  animate: { opacity: 1, x: 0 },
-  transition: { duration: DURATION, ease: EASE },
-};
-
-export const viewBelow = {
-  initial: { opacity: 0, y: 36 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, amount: 0.35 },
-  transition: { duration: DURATION, ease: EASE },
-};
-
-export const viewLeft = {
-  initial: { opacity: 0, x: -40 },
-  whileInView: { opacity: 1, x: 0 },
-  viewport: { once: true, amount: 0.35 },
-  transition: { duration: DURATION, ease: EASE },
-};
-
-export const viewRight = {
-  initial: { opacity: 0, x: 40 },
-  whileInView: { opacity: 1, x: 0 },
-  viewport: { once: true, amount: 0.35 },
-  transition: { duration: DURATION, ease: EASE },
-};
+export const VIEWPORT = { once: true, amount: 0.18 } as const;

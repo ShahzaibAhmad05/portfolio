@@ -24,7 +24,7 @@ const bayon = Bayon({
 export const metadata: Metadata = {
   title: "Shahzaib Ahmad Shahid | Software Engineer",
   description:
-    "Helping Founders Build High-Quality Software Free of AI slop.",
+    "Software engineer building desktop apps, search systems and computer vision by hand. Helping founders build high-quality software, free of AI slop.",
 };
 
 export default function RootLayout({
