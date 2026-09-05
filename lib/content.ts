@@ -43,6 +43,7 @@ export const CASE_STUDIES: CaseStudy[] = [
       "A search engine written in C++ over the 1M-article CORD-19 research corpus. Inverted index with BM25 ranking, lexicon-backed autocomplete, and AI overviews layered on top.",
     tech: ["C++17", "BM25", "CMake", "Azure OpenAI", "REST"],
     thumbnail: "search results UI",
+    image: "/work/nextsearch.webp",
     detail: [
       {
         label: "The problem",
