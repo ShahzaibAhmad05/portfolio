@@ -4,7 +4,6 @@ import { APPROACH } from "@/lib/content";
 export default function ApproachSection() {
   return (
     <section
-      data-section="approach"
       id="approach"
       className="scroll-mt-[68px] border-t border-hairline bg-background-light"
     >

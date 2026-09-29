@@ -78,8 +78,6 @@ export default function CaseStudyCard({
           <div className="flex flex-wrap items-center gap-[18px] pt-1.5">
             <button
               type="button"
-              data-track={study.title}
-              data-track-event={open ? "case_study_close" : "case_study_open"}
               onClick={() => setOpen((v) => !v)}
               className="shrink-0 cursor-pointer rounded-full border border-accent/40 px-5 py-[11px] text-sm font-medium whitespace-nowrap text-accent transition-colors duration-200 hover:bg-accent/10"
             >
@@ -89,7 +87,6 @@ export default function CaseStudyCard({
               <Link
                 key={link.href}
                 href={link.href}
-                data-track={`${study.title}: ${link.label}`}
                 target="_blank"
                 rel="noreferrer"
                 className="shrink-0 text-sm whitespace-nowrap text-foreground-dim transition-colors duration-200 hover:text-foreground"

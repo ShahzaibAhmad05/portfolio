@@ -9,7 +9,6 @@ export default function HeroSection() {
   return (
     <section
       id="top"
-      data-section="hero"
       className="flex min-h-[calc(100svh-68px)] scroll-mt-[68px] items-center border-b border-hairline bg-background-light"
     >
       <div className="mx-auto grid w-full max-w-[1208px] grid-cols-[repeat(auto-fit,minmax(340px,1fr))] items-center gap-[clamp(40px,5vw,72px)] px-6 pt-[clamp(64px,7vw,104px)] pb-[clamp(56px,6vw,88px)]">
@@ -52,14 +51,12 @@ export default function HeroSection() {
           >
             <Link
               href="#contact"
-              data-track="hero-cta-discuss"
               className="rounded-full bg-accent px-7 py-[15px] text-[15px] font-medium text-background transition-colors duration-200 hover:bg-accent-hover"
             >
               Discuss an idea
             </Link>
             <Link
               href="#work"
-              data-track="hero-cta-work"
               className="rounded-full border border-white/[0.18] px-[26px] py-3.5 text-[15px] transition-colors duration-200 hover:border-accent hover:text-accent"
             >
               See selected work
@@ -76,7 +73,6 @@ export default function HeroSection() {
             <span className="px-2.5 text-foreground-faint">/</span>
             <Link
               href={`mailto:${CONTACT.email}`}
-              data-track="hero-email"
               className="text-accent transition-colors duration-200 hover:text-accent-hover"
             >
               {CONTACT.email}

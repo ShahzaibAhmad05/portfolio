@@ -4,7 +4,7 @@ import { CASE_STUDIES } from "@/lib/content";
 
 export default function WorkSection() {
   return (
-    <section id="work" data-section="work" className="scroll-mt-[68px] bg-background-light">
+    <section id="work" className="scroll-mt-[68px] bg-background-light">
       <div className="mx-auto w-full max-w-[1208px] px-6 py-[clamp(80px,9vw,128px)]">
         <Reveal className="mb-[clamp(36px,4vw,56px)] flex flex-wrap items-end justify-between gap-5">
           <div className="flex flex-col gap-3">

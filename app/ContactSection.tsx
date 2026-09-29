@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import Reveal from "@/components/Reveal";
-import { track } from "@/lib/analytics";
 import { CONTACT } from "@/lib/content";
 
 const WEB3FORMS_ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
@@ -27,7 +26,6 @@ export default function ContactSection() {
     const contact = String(data.get("contact") ?? "");
 
     if (!WEB3FORMS_ACCESS_KEY) {
-      track("form_mailto_fallback");
       const body = `${idea}\n\nReach me at: ${contact}`;
       window.location.href = `mailto:${CONTACT.email}?subject=${encodeURIComponent(
         "An idea for you",
@@ -50,15 +48,12 @@ export default function ContactSection() {
       const result = await res.json();
       if (res.ok && result.success) {
         setState("success");
-        track("form_success");
         form.reset();
       } else {
         setState("error");
-        track("form_error", { props: { status: res.status } });
       }
     } catch {
       setState("error");
-      track("form_error", { props: { status: "network" } });
     }
   }
 
@@ -72,7 +67,6 @@ export default function ContactSection() {
   return (
     <section
       id="contact"
-      data-section="contact"
       className="scroll-mt-[68px] border-t border-hairline bg-background-light"
     >
       <div className="mx-auto grid w-full max-w-[1208px] grid-cols-[repeat(auto-fit,minmax(320px,1fr))] items-start gap-[clamp(40px,5vw,72px)] px-6 py-[clamp(80px,9vw,128px)]">
@@ -91,7 +85,6 @@ export default function ContactSection() {
           <div className="flex flex-col gap-3.5 pt-2">
             <Link
               href={CONTACT.phoneHref}
-              data-track="contact-whatsapp"
               className="flex items-center gap-3 text-[15px] transition-colors duration-200 hover:text-accent"
             >
               <span
@@ -104,7 +97,6 @@ export default function ContactSection() {
             </Link>
             <Link
               href={`mailto:${CONTACT.email}`}
-              data-track="contact-email"
               className="flex items-center gap-3 text-[15px] transition-colors duration-200 hover:text-accent"
             >
               <span
@@ -147,7 +139,6 @@ export default function ContactSection() {
           </label>
           <button
             type="submit"
-            data-track="contact-submit"
             disabled={state === "pending"}
             className="cursor-pointer self-start rounded-full bg-accent px-[30px] py-[15px] text-[15px] font-medium text-background transition-colors duration-200 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
           >

@@ -8,7 +8,7 @@ const LINKS = [
 
 export default function SiteHeader() {
   return (
-    <header data-section="header" className="sticky top-0 z-50 border-b border-hairline bg-[rgba(28,28,27,0.82)] backdrop-blur-[14px]">
+    <header className="sticky top-0 z-50 border-b border-hairline bg-[rgba(28,28,27,0.82)] backdrop-blur-[14px]">
       <nav className="mx-auto flex h-[68px] w-full max-w-[1208px] items-center justify-between gap-6 px-6">
         <Link
           href="#top"
@@ -29,7 +29,6 @@ export default function SiteHeader() {
           ))}
           <Link
             href="#contact"
-            data-track="header-cta-discuss"
             className="rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-background transition-colors duration-200 hover:bg-accent-hover"
           >
             Discuss an idea
