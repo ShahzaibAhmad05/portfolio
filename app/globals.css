@@ -1,30 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  /* palette — seller-site design */
-  --accent: #d97757;
-  --accent-hover: #e9967a;
-  --background: #1c1c1b;
-  --background-light: #242423;
-  --card: #2a2a28;
-  --surface: #40403d;
-  --foreground: #ffffff;
-  --foreground-body: #c4c4c0;
-  --foreground-dim: #a8a8a4;
-  --foreground-muted: #8a8a86;
-  --foreground-faint: #6b6b6b;
-  --hairline: rgba(255, 255, 255, 0.07);
-  --hairline-strong: rgba(255, 255, 255, 0.09);
+  /* palette: warm ink on paper, one electric accent */
+  --accent: #fff714;
+  --background: #f8f9f3;
+  --surface: #e9eae2;
+  --foreground: #1d1e19;
+  --foreground-body: #3a3b35;
+  --foreground-dim: #5c5d56;
+  --foreground-muted: #6b6c64;
+  --foreground-faint: #8e8f86;
+  --hairline: rgba(29, 30, 25, 0.1);
+  --hairline-strong: rgba(29, 30, 25, 0.25);
+  --ink: #151612;
+  --on-ink: #e9eae2;
 }
 
 @theme inline {
   --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
   --color-background: var(--background);
-  --color-background-light: var(--background-light);
-  --color-card: var(--card);
   --color-surface: var(--surface);
   --color-foreground: var(--foreground);
   --color-foreground-body: var(--foreground-body);
@@ -33,29 +29,72 @@
   --color-foreground-faint: var(--foreground-faint);
   --color-hairline: var(--hairline);
   --color-hairline-strong: var(--hairline-strong);
-  --font-sans: var(--font-be-vietnam-pro);
-  --font-display: var(--font-bayon);
+  --color-ink: var(--ink);
+  --color-on-ink: var(--on-ink);
+  --font-sans: var(--font-sans-face);
+  --font-serif: var(--font-serif-face);
+  --font-mono: var(--font-mono-face);
+  --font-ui: var(--font-ui-face);
+  --font-logo: var(--font-logo-face);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-be-vietnam-pro), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans-face), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.4px;
   overflow-x: hidden;
 }
 
 ::selection {
   background: var(--accent);
-  color: var(--background);
+  color: var(--foreground);
 }
 
-/* the diagonal hatch behind each case-study thumbnail */
-.hatch {
-  background: repeating-linear-gradient(
-    135deg,
-    #333331 0px,
-    #333331 9px,
-    #2e2e2c 9px,
-    #2e2e2c 18px
-  );
+/* the site agent draws its own cursor; give the real one back inside dialogs */
+.agent-cursor,
+.agent-cursor * {
+  cursor: none !important;
+}
+.agent-cursor [aria-modal="true"],
+.agent-cursor [aria-modal="true"] * {
+  cursor: auto !important;
+}
+.agent-cursor textarea,
+.agent-cursor input {
+  cursor: text !important;
+}
+
+/* the site agent's chat: things rise into place, and the typing dots pulse */
+@keyframes agent-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@keyframes agent-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes agent-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+.agent-in {
+  animation: agent-in 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.agent-fade {
+  animation: agent-fade 220ms linear both;
+}
+.agent-dot {
+  animation: agent-dot 1100ms ease-in-out infinite;
 }

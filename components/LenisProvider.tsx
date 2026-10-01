@@ -10,7 +10,7 @@ const options = {
   smoothWheel: true,
   touchMultiplier: 1.4,
   wheelMultiplier: 0.9,
-  anchors: { offset: -68 },
+  anchors: { offset: -88 },
 };
 
 export default function LenisProvider({ children }: { children: ReactNode }) {

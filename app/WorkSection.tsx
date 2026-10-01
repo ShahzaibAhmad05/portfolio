@@ -1,31 +1,57 @@
-import CaseStudyCard from "@/components/CaseStudyCard";
+import Image from "next/image";
 import Reveal from "@/components/Reveal";
-import { CASE_STUDIES } from "@/lib/content";
+import CodeText from "@/components/CodeText";
+import { WORK } from "@/lib/content";
+
+const ALIGN = { start: "self-start", center: "self-center", end: "self-end" } as const;
+// each tile fades in from the side it sits on; centred ones still rise from below
+const FROM = { start: "left", center: "up", end: "right" } as const;
 
 export default function WorkSection() {
   return (
-    <section id="work" className="scroll-mt-[68px] bg-background-light">
-      <div className="mx-auto w-full max-w-[1208px] px-6 py-[clamp(80px,9vw,128px)]">
-        <Reveal className="mb-[clamp(36px,4vw,56px)] flex flex-wrap items-end justify-between gap-5">
-          <div className="flex flex-col gap-3">
-            <span className="text-[11px] font-medium tracking-[0.16em] text-accent uppercase">
-              Selected work
-            </span>
-            <h2 className="font-display text-[clamp(38px,4.6vw,60px)] leading-none tracking-[0.01em]">
-              THINGS I BUILT AND SHIPPED
-            </h2>
-          </div>
-          <p className="max-w-[34ch] text-[15px] font-light leading-[1.6] text-foreground-dim text-pretty">
-            Three projects that show the range: systems performance, computer
-            vision, and developer tooling.
-          </p>
-        </Reveal>
+    <section
+      id="work"
+      data-section="work"
+      className="scroll-mt-[88px] rounded-b-3xl bg-background px-[clamp(16px,2.22vw,32px)] pt-[clamp(80px,8.9vw,128px)]"
+    >
+      <div className="mb-24 flex max-w-[751px] flex-col gap-3 md:ml-8">
+        <span className="font-serif text-[18.18px] leading-[25.452px] italic">Selected works</span>
+        <h2 className="font-serif text-[21.26px] leading-[25.512px] font-normal">
+          Things I built as side projects, being used by people
+        </h2>
+      </div>
 
-        <div className="flex flex-col gap-5">
-          {CASE_STUDIES.map((study, i) => (
-            <CaseStudyCard key={study.title} study={study} delay={i * 90} />
-          ))}
-        </div>
+      <div className="flex flex-col gap-[76px] pb-20">
+        {WORK.map((work) => (
+          <Reveal key={work.title} from={FROM[work.align]} className={`w-full max-w-[760px] ${ALIGN[work.align]}`}>
+            <a
+              href={work.href}
+              target="_blank"
+              rel="noreferrer"
+              data-agent-stop
+              data-cursor-label="VIEW"
+              className="flex flex-col transition-opacity duration-200 ease-[cubic-bezier(0,0,0,1)] hover:opacity-85"
+            >
+              <div className="relative w-full overflow-hidden bg-surface" style={{ aspectRatio: work.ratio }}>
+                <Image src={work.image} alt={`${work.title} preview`} fill sizes="(min-width: 800px) 760px, 100vw" className="object-cover" />
+              </div>
+              <span className="mt-[18px] font-serif text-[18.18px] leading-[25.45px]">{work.title}</span>
+              <p className="mb-[18px] text-lg leading-[28.8px]">
+                <CodeText text={work.summary} />
+              </p>
+              <div className="mt-3 flex flex-wrap gap-1">
+                {work.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="h-6 rounded-[800px] bg-foreground/5 px-3 font-serif text-xs leading-6 tracking-[0.12px]"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </a>
+          </Reveal>
+        ))}
       </div>
     </section>
   );

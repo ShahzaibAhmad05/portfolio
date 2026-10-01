@@ -1,114 +1,115 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import Reveal from "@/components/Reveal";
-import { CONTACT } from "@/lib/content";
+import { useEffect, useRef, useState } from "react";
+
+const SWAP_MS = 2200;
+const SLIDE = "600ms cubic-bezier(0.22, 1, 0.36, 1)";
+/** Space between rotating words: tall enough to hold a descender (g, y, p) so it is neither clipped nor peeking into the next word. */
+const ROW_GAP = 0.3;
+/** The underline: how far its bottom edge hangs below the word's box (em), and its thickness (px). */
+const UNDERLINE_DROP = 0.2;
+const UNDERLINE_PX = 3;
+
+function ClaudeMark() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden className="size-[0.78em] shrink-0 fill-[#D97757]">
+      <path d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z" />
+    </svg>
+  );
+}
+
+function OpenAIMark() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden className="size-[0.78em] shrink-0 fill-foreground">
+      <path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z" />
+    </svg>
+  );
+}
+
+const WORDS = [
+  { label: "Engineering", mark: null },
+  { label: "Claude", mark: <ClaudeMark /> },
+  { label: "Codex", mark: <OpenAIMark /> },
+];
+
+/** The word on the underline: slides between WORDS, and the underline resizes to fit each one. */
+function RotatingWord() {
+  const [index, setIndex] = useState(0);
+  const [widths, setWidths] = useState<number[] | null>(null);
+  const refs = useRef<(HTMLSpanElement | null)[]>([]);
+
+  useEffect(() => {
+    const measure = () => {
+      const els = refs.current;
+      if (els.length === WORDS.length && els.every(Boolean)) setWidths(els.map((el) => el!.offsetWidth));
+    };
+    measure();
+    // the web font can land after mount; re-measure whenever a word's box changes size
+    const ro = new ResizeObserver(measure);
+    refs.current.forEach((el) => el && ro.observe(el));
+    const id = setInterval(() => setIndex((i) => (i + 1) % WORDS.length), SWAP_MS);
+    return () => {
+      ro.disconnect();
+      clearInterval(id);
+    };
+  }, []);
+
+  return (
+    <span
+      className="relative inline-block align-bottom"
+      style={{ width: widths ? widths[index] : "auto", transition: `width ${SLIDE}` }}
+    >
+      {/* the window ends at the top edge of the underline, so the next word rises out of the line itself; rows sit 1.1em + ROW_GAP apart so neighbours never bleed in */}
+      <span className="block h-[1.1em]" style={{ clipPath: `inset(0 -0.2em calc(${UNDERLINE_PX}px - ${UNDERLINE_DROP}em) 0)` }}>
+        <span
+          aria-live="polite"
+          className="flex w-max flex-col items-start"
+          style={{ gap: `${ROW_GAP}em`, transform: `translateY(${index * -(1.1 + ROW_GAP)}em)`, transition: `transform ${SLIDE}` }}
+        >
+          {WORDS.map((w, i) => (
+            <span
+              key={w.label}
+              ref={(el) => {
+                refs.current[i] = el;
+              }}
+              aria-hidden={i !== index}
+              className="flex h-[1.1em] items-center gap-[0.2em] whitespace-nowrap"
+            >
+              {w.mark}
+              {w.label}
+            </span>
+          ))}
+        </span>
+      </span>
+      <span aria-hidden className="absolute right-0 left-0 bg-foreground" style={{ bottom: `-${UNDERLINE_DROP}em`, height: UNDERLINE_PX }} />
+    </span>
+  );
+}
 
 export default function HeroSection() {
   return (
     <section
       id="top"
-      className="flex min-h-[calc(100svh-68px)] scroll-mt-[68px] items-center border-b border-hairline bg-background-light"
+      data-section="hero"
+      className="flex min-h-[calc(100svh-88px)] flex-col gap-12 border-b border-hairline px-[clamp(20px,9.72vw,140px)] pt-[clamp(48px,5.56vw,80px)] pb-[clamp(40px,4.44vw,64px)]"
     >
-      <div className="mx-auto grid w-full max-w-[1208px] grid-cols-[repeat(auto-fit,minmax(340px,1fr))] items-center gap-[clamp(40px,5vw,72px)] px-6 pt-[clamp(64px,7vw,104px)] pb-[clamp(56px,6vw,88px)]">
-        <div className="flex min-w-0 flex-col items-start gap-7">
-          <Reveal from="down" immediate className="flex flex-col gap-1">
-            <span className="font-display text-[clamp(20px,2vw,24px)] leading-none tracking-[0.14em] text-foreground-dim">
-              THIS IS
-            </span>
-            <h1 className="font-display text-[clamp(72px,9.5vw,132px)] leading-[0.88] tracking-[0.005em] text-accent">
-              SHAHZAIB
-            </h1>
-          </Reveal>
-
-          <Reveal
-            as="p"
-            from="left"
-            immediate
-            delay={90}
-            className="max-w-[19ch] text-[clamp(20px,2.1vw,27px)] font-light leading-[1.35] text-pretty"
-          >
-            Helping founders build high-quality software, free of AI slop.
-          </Reveal>
-
-          <Reveal
-            as="p"
-            from="left"
-            immediate
-            delay={150}
-            className="max-w-[44ch] text-base font-light leading-[1.65] text-foreground-dim text-pretty"
-          >
-            Software engineer, 3+ years. Desktop apps, search systems and computer
-            vision, built by hand, shipped to clients in six countries.
-          </Reveal>
-
-          <Reveal
-            from="left"
-            immediate
-            delay={210}
-            className="flex flex-wrap items-center gap-3.5 pt-1"
-          >
-            <Link
-              href="#contact"
-              className="rounded-full bg-accent px-7 py-[15px] text-[15px] font-medium text-background transition-colors duration-200 hover:bg-accent-hover"
-            >
-              Discuss an idea
-            </Link>
-            <Link
-              href="#work"
-              className="rounded-full border border-white/[0.18] px-[26px] py-3.5 text-[15px] transition-colors duration-200 hover:border-accent hover:text-accent"
-            >
-              See selected work
-            </Link>
-          </Reveal>
-
-          <Reveal
-            from="left"
-            immediate
-            delay={270}
-            className="mt-1.5 w-full border-t border-white/[0.08] pt-[18px] text-[13px] text-foreground-dim"
-          >
-            <span className="text-foreground">{CONTACT.phone}</span>
-            <span className="px-2.5 text-foreground-faint">/</span>
-            <Link
-              href={`mailto:${CONTACT.email}`}
-              className="text-accent transition-colors duration-200 hover:text-accent-hover"
-            >
-              {CONTACT.email}
-            </Link>
-            <span className="px-2.5 text-foreground-faint">·</span>
-            <span className="text-accent">Available for new work</span>
-          </Reveal>
-        </div>
-
-        <Reveal
-          from="right"
-          immediate
-          delay={60}
-          className="flex min-w-0 justify-center"
-        >
-          <div className="relative aspect-[5/6] w-full max-w-[420px] overflow-hidden rounded-[20px] border border-white/[0.09] bg-background">
-            <Image
-              src="/pfp.png"
-              alt="Shahzaib Ahmad Shahid"
-              fill
-              priority
-              sizes="(max-width: 768px) 90vw, 420px"
-              className="object-cover object-bottom contrast-[1.04] grayscale-[0.35]"
-            />
-            <div
-              aria-hidden
-              className="absolute inset-0 bg-[linear-gradient(to_top,rgba(28,28,27,0.92)_0%,rgba(28,28,27,0.18)_42%,rgba(28,28,27,0)_68%)]"
-            />
-            <div className="absolute right-[22px] bottom-5 left-[22px] flex flex-col gap-[3px]">
-              <span className="text-[15px] font-medium">Shahzaib Ahmad Shahid</span>
-              <span className="text-xs font-light text-foreground-dim">
-                Software Engineer · Islamabad, PK
-              </span>
-            </div>
-          </div>
-        </Reveal>
+      <h1 className="text-center text-[clamp(34px,3.85vw,55.43px)] leading-[1.1] font-normal tracking-[-0.02em]">
+        A full-stack developer blitzing excellent design quality{" "}
+        <span className="whitespace-nowrap">
+          with <RotatingWord />
+        </span>
+      </h1>
+      <div className="relative min-h-[320px] grow overflow-hidden rounded-[20px] bg-surface">
+        <video
+          className="absolute inset-0 h-full w-full object-cover"
+          src="/video/hero-v2.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-label="Showreel"
+        />
       </div>
     </section>
   );

@@ -1,30 +1,63 @@
 import type { Metadata } from "next";
-import { Be_Vietnam_Pro, Bayon } from "next/font/google";
+import { Geist, Instrument_Serif, JetBrains_Mono, Source_Serif_4 } from "next/font/google";
+import localFont from "next/font/local";
+import FaviconCycle from "@/components/FaviconCycle";
 import LenisProvider from "@/components/LenisProvider";
+import Preloader from "@/components/Preloader";
+import SiteAgent from "@/components/SiteAgent";
 import "lenis/dist/lenis.css";
 import "./globals.css";
 
-const beVietnamPro = Be_Vietnam_Pro({
-  variable: "--font-be-vietnam-pro",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+// Satoshi (Fontshare, self-hosted) stands in for Area Normal, Source Serif 4 for HAL
+// Timezone. Satoshi has no 600, so semibold text resolves to its 700.
+const sans = localFont({
+  variable: "--font-sans-face",
+  src: [
+    { path: "./fonts/Satoshi-400.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/Satoshi-500.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/Satoshi-700.woff2", weight: "700", style: "normal" },
+  ],
   display: "swap",
-  preload: true,
-  adjustFontFallback: true,
 });
 
-const bayon = Bayon({
-  variable: "--font-bayon",
+const serif = Source_Serif_4({
+  variable: "--font-serif-face",
   subsets: ["latin"],
-  weight: "400",
+  weight: ["200", "400", "500"],
+  style: ["normal", "italic"],
   display: "swap",
-  preload: true,
+});
+
+const mono = JetBrains_Mono({
+  variable: "--font-mono-face",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
+});
+
+// Geist (Google Fonts, OFL) for small interface labels, such as the Book a call pill
+const ui = Geist({
+  variable: "--font-ui-face",
+  subsets: ["latin"],
+  weight: ["500"],
+  display: "swap",
+});
+
+// Instrument Serif (Google Fonts, OFL) for the wordmark in the header
+const logo = Instrument_Serif({
+  variable: "--font-logo-face",
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["normal", "italic"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Shahzaib Ahmad Shahid | Software Engineer",
+  // the resting icon, for bookmarks and before FaviconCycle starts swapping
+  icons: { icon: "/favicons/5.png" },
+  title: "Shahzaib's Portfolio",
   description:
-    "Software engineer building desktop apps, search systems and computer vision by hand. Helping founders build high-quality software, free of AI slop.",
+    "A Software Engineer converting AI-generated prototypes into straight-up ART. Get Top 1% quality in your Web products and mobile apps.",
 };
 
 export default function RootLayout({
@@ -35,10 +68,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${beVietnamPro.variable} ${bayon.variable} h-full antialiased`}
+      className={`${sans.variable} ${serif.variable} ${mono.variable} ${ui.variable} ${logo.variable} h-full antialiased`}
     >
-      <body className={`${beVietnamPro.className} min-h-full`}>
-        <LenisProvider>{children}</LenisProvider>
+      <body className={`${sans.className} min-h-full`}>
+        <LenisProvider>
+          {children}
+          <SiteAgent />
+          <FaviconCycle />
+          <Preloader />
+        </LenisProvider>
       </body>
     </html>
   );

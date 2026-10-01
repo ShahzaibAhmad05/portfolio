@@ -1,160 +1,37 @@
 "use client";
 
-import Link from "next/link";
-import { useState, type FormEvent } from "react";
-import Reveal from "@/components/Reveal";
-import { CONTACT } from "@/lib/content";
-
-const WEB3FORMS_ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
-
-type SendState = "idle" | "pending" | "success" | "error";
-
-const FIELD =
-  "w-full rounded-xl border border-white/[0.11] bg-background px-4 py-[15px] text-[15px] font-light text-foreground outline-none transition-colors duration-200 placeholder:text-foreground-faint focus:border-accent";
-
-const LABEL =
-  "text-[11px] font-medium tracking-[0.14em] text-foreground-dim uppercase";
+import { IDEA_EVENT } from "@/components/SiteAgent";
 
 export default function ContactSection() {
-  const [state, setState] = useState<SendState>("idle");
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const data = new FormData(form);
-    const idea = String(data.get("idea") ?? "");
-    const contact = String(data.get("contact") ?? "");
-
-    if (!WEB3FORMS_ACCESS_KEY) {
-      const body = `${idea}\n\nReach me at: ${contact}`;
-      window.location.href = `mailto:${CONTACT.email}?subject=${encodeURIComponent(
-        "An idea for you",
-      )}&body=${encodeURIComponent(body)}`;
-      return;
-    }
-
-    setState("pending");
-    try {
-      const res = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({
-          access_key: WEB3FORMS_ACCESS_KEY,
-          subject: "An idea for you, from the portfolio site",
-          idea,
-          contact,
-        }),
-      });
-      const result = await res.json();
-      if (res.ok && result.success) {
-        setState("success");
-        form.reset();
-      } else {
-        setState("error");
-      }
-    } catch {
-      setState("error");
-    }
-  }
-
-  const buttonLabel = {
-    idle: "Send an email",
-    pending: "Sending…",
-    success: "Sent, I'll reply shortly",
-    error: "Something went wrong, try again",
-  }[state];
+  // the site agent takes it from here: its chat opens on the idea form
+  const openForm = () => window.dispatchEvent(new Event(IDEA_EVENT));
 
   return (
-    <section
-      id="contact"
-      className="scroll-mt-[68px] border-t border-hairline bg-background-light"
-    >
-      <div className="mx-auto grid w-full max-w-[1208px] grid-cols-[repeat(auto-fit,minmax(320px,1fr))] items-start gap-[clamp(40px,5vw,72px)] px-6 py-[clamp(80px,9vw,128px)]">
-        <Reveal from="left" className="flex min-w-0 flex-col gap-[22px]">
-          <span className="text-[11px] font-medium tracking-[0.16em] text-accent uppercase">
-            Contact
-          </span>
-          <h2 className="font-display text-[clamp(38px,4.8vw,64px)] leading-[0.98] tracking-[0.01em]">
-            READY TO BUILD YOUR NEXT REVENUE?
-          </h2>
-          <p className="max-w-[40ch] text-base font-light leading-[1.7] text-foreground-dim text-pretty">
-            Tell me what you are trying to ship. I will reply with scope, a
-            timeline and a number, usually within a day.
-          </p>
-
-          <div className="flex flex-col gap-3.5 pt-2">
-            <Link
-              href={CONTACT.phoneHref}
-              className="flex items-center gap-3 text-[15px] transition-colors duration-200 hover:text-accent"
-            >
-              <span
-                aria-hidden
-                className="flex size-[34px] shrink-0 items-center justify-center rounded-full border border-white/[0.14] text-[13px] text-accent"
-              >
-                ☎
-              </span>
-              {CONTACT.phone}
-            </Link>
-            <Link
-              href={`mailto:${CONTACT.email}`}
-              className="flex items-center gap-3 text-[15px] transition-colors duration-200 hover:text-accent"
-            >
-              <span
-                aria-hidden
-                className="flex size-[34px] shrink-0 items-center justify-center rounded-full border border-white/[0.14] text-[13px] text-accent"
-              >
-                ✉
-              </span>
-              {CONTACT.email}
-            </Link>
-          </div>
-        </Reveal>
-
-        <Reveal
-          as="form"
-          from="right"
-          delay={120}
-          onSubmit={handleSubmit}
-          className="flex min-w-0 flex-col gap-[22px] rounded-[20px] border border-white/[0.08] bg-card p-[clamp(26px,3vw,38px)]"
+    // Pinned to the bottom of the viewport, beneath the paper layer, so it is already there as that layer
+    // slides off it; once fully uncovered it lets go and scrolls on. The top 40px stays tucked under
+    // Testimonials' rounded corners. The dark behind its own rounded corners matches the footer that follows.
+    <div className="sticky bottom-0 bg-ink">
+      <section
+        id="contact"
+        data-section="contact"
+        className="flex min-h-[calc(clamp(520px,52.8vw,760px)+40px)] scroll-mt-12 flex-col items-center justify-center gap-11 rounded-b-[40px] bg-accent px-[clamp(20px,9.72vw,140px)] pt-34 pb-24 text-center"
+      >
+        <h2 className="m-0 max-w-[16ch] text-[clamp(40px,5.28vw,76px)] leading-[1.12] font-normal tracking-[-1px]">
+          Ready to build your next revenue?
+        </h2>
+        <button
+          type="button"
+          onClick={openForm}
+          aria-haspopup="dialog"
+          className="flex h-[50px] cursor-pointer items-center gap-3.5 rounded-full bg-black pr-[26px] pl-7 text-xl leading-none text-background"
         >
-          <label className="flex flex-col gap-[9px]">
-            <span className={LABEL}>Your idea</span>
-            <textarea
-              name="idea"
-              rows={5}
-              required
-              placeholder="Type freely. I would treat this as highly confidential."
-              className={`${FIELD} resize-y leading-[1.6]`}
-            />
-          </label>
-          <label className="flex flex-col gap-[9px]">
-            <span className={LABEL}>Any contact info</span>
-            <input
-              name="contact"
-              type="text"
-              required
-              placeholder="So I can respond back to you."
-              className={FIELD}
-            />
-          </label>
-          <button
-            type="submit"
-            disabled={state === "pending"}
-            className="cursor-pointer self-start rounded-full bg-accent px-[30px] py-[15px] text-[15px] font-medium text-background transition-colors duration-200 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {buttonLabel}
-          </button>
-          {state === "error" ? (
-            <p className="text-sm font-light text-foreground-dim">
-              That did not go through. You can retry, or email me directly at{" "}
-              <Link href={`mailto:${CONTACT.email}`} className="text-accent hover:underline">
-                {CONTACT.email}
-              </Link>
-              .
-            </p>
-          ) : null}
-        </Reveal>
-      </div>
-    </section>
+          It&rsquo;s One-Click Away
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M7 7l10 10" />
+            <path d="M17 8v9H8" />
+          </svg>
+        </button>
+      </section>
+    </div>
   );
 }
