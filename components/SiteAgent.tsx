@@ -4,6 +4,7 @@ import Lenis from "lenis";
 import { useLenis } from "lenis/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CONTACT } from "@/lib/content";
+import { LINKS, TOPICS, type Action, type Topic } from "@/lib/agentTopics";
 
 /*
  * The site agent: a fuzzy dot sphere with eyes that rides the page, springs to a
@@ -14,10 +15,23 @@ import { CONTACT } from "@/lib/content";
 
 // ---- Tunables (px on the 1440 x 900 design frame, ms for time) ---------------
 const TUNE = {
-  BLINK_MIN_MS: 3000,
-  BLINK_MAX_MS: 6000,
-  BLINK_CLOSE_MS: 120,
-  DOUBLE_BLINK_CHANCE: 0.25,
+  BLINK_HALF_MS: 130, // a blink closes for this long, then opens for as long: linear, no easing
+  BLINK_FIRST_MS: 4000, // the first one, after the eyes appear
+  BLINK_GAP_MS: 2600, // then this long between blinks...
+  BLINK_GAP_RAND_MS: 3600, // ...plus up to this much, at random
+  DOUBLE_BLINK_CHANCE: 0.25, // this often a blink is followed straight away by a second one...
+  DOUBLE_BLINK_GAP_MS: 90, // ...after the eyes have been open this long
+  BLINK_MIN_OPEN: 0.12, // the eye squashes down to this share of its height; below it, a closed-lid line
+  BLINK_LINE_PX: 2.2,
+  BLINK_LINE_SPAN: 0.9, // the closed lid reaches this share of the eye radius either side
+  DIZZY_MOUSE_SPEED: 3500, // px/s: the pointer moving faster than this...
+  DIZZY_SCROLL_SPEED: 5000, // ...or the page scrolling faster than this...
+  DIZZY_HOLD_MS: 300, // ...for about this long makes the agent dizzy
+  DIZZY_MS: 2600, // how long the spiral eyes last
+  DIZZY_COOLDOWN_MS: 6000, // and the rest before it can happen again
+  DIZZY_SPIN: 0.012, // rad/ms, about 1.9 turns a second
+  DIZZY_TURNS: 2.5, // coils in each spiral
+  BLINK_PUPIL_HOLD: 0.2, // the pupil's height is steadied against the squash down to this openness
   SPRING_K: 52, // position spring: settles in ~0.9s with a hair of overshoot
   SPRING_DAMP: 12.6,
   MAX_SPEED: 2800, // px/s
@@ -56,125 +70,67 @@ const TUNE = {
   NEAR_PX: 70,
   REST_MS: 1200,
   TIP_COOLDOWN_MS: 5000,
+  NEAR_CHANCE: 0.4, // how often coming close gets a line at all, once the cooldown has passed
+  REST_CHANCE: 0.5, // and how often lingering on the agent does
   CURSOR_MS: 300,
   CURSOR_DOT_PX: 16,
   CURSOR_RING_PX: 44,
   CURSOR_BORDER_PX: 2,
+  CURSOR_BAR_W: 1, // the typing bar over text fields, before its border
+  CURSOR_BAR_H: 24,
   CURSOR_LABEL_SPACING: "0.6px",
+  TIP_SPACING: "0.4px",
 };
 const ACCENT = "#FFF714";
 const INK = "#1D1E19";
 // the agent's seat in the chat header: its hero size, which scales with the viewport like `ss` does
 const SEAT_SIZE = `clamp(${TUNE.SIZE_SMALL * 0.75}px, ${(TUNE.SIZE_SMALL / 1440) * 100}vw, ${TUNE.SIZE_SMALL * 1.25}px)`;
 const CURSOR_INK = "#0E0E0C";
-const CURSOR_FILL = "#FFFFFF";
+const CURSOR_FILL = "#F8F9F3"; // the page background
+// The cursor is one solid colour, CURSOR_INK or CURSOR_FILL: whichever contrasts more with
+// what is under it. The ground is re-read this often (ms), and the colour eases over.
+const CURSOR_GROUND_MS = 80;
+const CURSOR_TONE_MS = 160;
+const hexRgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+const CURSOR_RGB = { ink: hexRgb(CURSOR_INK), fill: hexRgb(CURSOR_FILL) };
+/** WCAG relative luminance of an 8-bit sRGB colour, 0 (black) to 1 (white). */
+const luminance = (r: number, g: number, b: number) => {
+  const lin = (v: number) => (v / 255 <= 0.03928 ? v / 255 / 12.92 : ((v / 255 + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+};
+/** The ground luminance at which two colours contrast equally with it: below it the lighter one wins, above it the darker. */
+const flipAt = (a: number[], b: number[]) => Math.sqrt((luminance(a[0], a[1], a[2]) + 0.05) * (luminance(b[0], b[1], b[2]) + 0.05)) - 0.05;
+const mixRgb = (a: number[], b: number[], t: number) => `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * t)).join(",")})`;
+const CURSOR_FLIP_AT = flipAt(CURSOR_RGB.ink, CURSOR_RGB.fill);
+// The agent's body is ink, and accent in sections marked `dark` (and in the chat); it eases between the two.
+const AGENT_RGB = { ink: hexRgb(INK), accent: hexRgb(ACCENT) };
+const AGENT_TONE_MS = 220;
 // hovering these turns the cursor into a hollow ring
-const CURSOR_RING = 'header a, footer a, #craft a[href="#contact"], [aria-haspopup="dialog"]';
+const CURSOR_RING = 'header a, footer a, #craft a[href*="calendly.com"], [aria-haspopup="dialog"]';
 
 // x, y are fractions of the section's box, or of the viewport when `screen` is set
 type Spot = { x: number; y: number; size: number; screen?: boolean; drift?: boolean };
-type Section = Spot & { id: string; dark: boolean; line: string };
+type Section = Spot & { id: string; line: string; dark?: boolean };
 
 // Matched to the [data-section] ids on the page.
 const SECTIONS: Section[] = [
-  { id: "hero", dark: false, line: "Hi. I live here.", x: 0.95, y: 0.21, screen: true, size: TUNE.SIZE_SMALL },
-  { id: "work", dark: false, line: "Products with actual users.", x: 0.2, y: 0.42, size: TUNE.SIZE_WORK },
-  { id: "craft", dark: false, line: "Scroll this slowly.", x: 0.8, y: 0.44, size: TUNE.SIZE_DEFAULT },
-  { id: "testimonials", dark: false, line: "All Verified Feedback.", x: 0.1, y: 0.52, size: TUNE.SIZE_DEFAULT },
-  { id: "contact", dark: false, line: "Go on, press it.", x: 0.82, y: 0.6, size: TUNE.SIZE_HUGE, drift: true },
+  { id: "hero", line: "Hi. I live here.", x: 0.95, y: 0.21, screen: true, size: TUNE.SIZE_SMALL },
+  { id: "work", line: "Products with actual users.", x: 0.2, y: 0.42, size: TUNE.SIZE_WORK },
+  { id: "craft", line: "Scroll this slowly.", x: 0.8, y: 0.44, size: TUNE.SIZE_DEFAULT },
+  { id: "testimonials", line: "All Verified Feedback.", x: 0.1, y: 0.52, size: TUNE.SIZE_DEFAULT },
+  { id: "contact", line: "Go on, press it.", x: 0.82, y: 0.6, size: TUNE.SIZE_HUGE, drift: true },
   // sits high, in the empty top-right of the footer, clear of the wordmark
   { id: "footer", dark: true, line: "The end!", x: 0.9, y: 0.3, size: TUNE.SIZE_DEFAULT },
 ];
 
 const NEAR_LINES = ["Oh, hello.", "Did you know I talked?", "I’m observing.", "Click me. I won’t bite.", "Personal space. Kidding."];
+const DIZZY_LINES = ["Please move slower.", "Whoa. Slow down.", "Too fast. I’m dizzy.", "Easy. I get motion sick.", "Everything is spinning."];
 const REST_LINES = ["Still there? Click me.", "Staring contest. You lose.", "I can do this all day."];
+// Lines said once per page load: every section's line, plus any other line listed here
+// (from NEAR_LINES or REST_LINES). The text must match the line exactly.
+const ONCE_LINES = new Set<string>([...SECTIONS.map((s) => s.line)]);
+const saidOnce = new Set<string>(); // lives until the page reloads
 
-// Buttons an answer can carry. List any of these words in a topic's `actions`:
-// the links open in a new tab, and "form" starts the idea form under the answer.
-const LINKS = {
-  linkedin: { label: "LinkedIn", href: CONTACT.linkedin },
-  whatsapp: { label: "WhatsApp", href: CONTACT.whatsapp },
-  email: { label: "Email", href: `mailto:${CONTACT.email}` },
-};
-type Action = keyof typeof LINKS | "form";
-
-type Topic = { q: string; a: string; actions?: Action[]; more?: Topic[] };
-
-const IRIS_REPO = "github.com/d-khalid/IRis";
-const GITREE_REPO = "github.com/ShahzaibAhmad05/gitree";
-const NEXTSEARCH_REPO = "github.com/ShahzaibAhmad05/NextSearch-api";
-
-// The chat is a tree three levels deep: primary questions, each opening secondary
-// ones, some of which open tertiary ones. A question with nothing under it answers
-// and hands the menu back to the primary questions.
-const TOPICS: Topic[] = [
-  {
-    q: "How did Shahzaib build this portfolio?",
-    a: "A few pieces from here and there. Claude helped him put it all together and make it consistent. \n\nIt was fully done in two days, then refined slowly till now.",
-    more: [
-      {
-        q: "Can he build a website better than this for me?",
-        a: "Sure he can. Build quality depends on the time he spends on it. Go on, give him some time and money, and you’ll see good results.\n\nHe always underpromises and overdelivers.",
-        more: [
-          { q: "Provide me with his contact info.", a: "Here you go.", actions: ["email", "whatsapp", "linkedin"] },
-          { q: "I want to message him instantly.", a: `Sure, go on.`, actions: ["whatsapp"] },
-        ],
-      },
-      {
-        q: "So, is he a vibe-coder?",
-        a: "Well, no. He is aware of and familiar with useful technical details. Just don’t go on asking about the syntax because knowing it is not a big deal.",
-        more: [
-          { q: "Then where did he learn frontend and coding?", a: "He has a software engineering degree and has been coding since before AI came in. Moreover, he speaks of reading books and articles on good design practices, using well-designed sites for inspiration, and most importantly, Claude design." },
-          { q: "Give me his contact details.", a: "Sure, here you go.", actions: ["email", "whatsapp", "linkedin"] },
-        ],
-      },
-    ],
-  },
-  {
-    q: "Show me real projects",
-    a: "Three you can look at right now: IRis + SketchLogic, NextSearch and gitree. Which one?",
-    more: [
-      {
-        q: "What is IRis + SketchLogic?",
-        a: "A digital logic circuit simulator for the desktop. Draw a circuit on paper, photograph it, and it becomes a running simulation. No LLMs, no paid APIs.",
-        more: [{ q: "Where can I see it?", a: `It’s open on GitHub: ${IRIS_REPO}` }],
-      },
-      {
-        q: "What is NextSearch?",
-        a: "A search engine written in C++ over the 1M-article CORD-19 research corpus, with BM25 ranking, autocomplete and AI overviews. It answers in under 50ms.",
-        more: [{ q: "Where can I see it?", a: `The API is on GitHub: ${NEXTSEARCH_REPO}` }],
-      },
-      {
-        q: "What is gitree?",
-        a: "A command-line replacement for ls that reads folder structures and packages an entire codebase for an LLM prompt. Open source, published on PyPI.",
-        more: [{ q: "Where can I get it?", a: `pip install gitree, or read the code at ${GITREE_REPO}` }],
-      },
-    ],
-  },
-  {
-    q: "What are his OSS contributions?",
-    a: "He has three open-source projects available on GitHub: IRis, NextSearch, gitree.\n\nWhich one would you like to see?",
-    more: [
-      { q: "IRis, the digital logic simulator", a: `Yes: ${IRIS_REPO}` },
-      {
-        q: "gitree, a CLI-based tool",
-        a: "On PyPI, so it’s one command away: pip install gitree",
-        more: [{ q: "Can I contribute?", a: `It already has outside contributors and merged PRs, so yes. Start at ${GITREE_REPO}` }],
-      },
-      { q: "NextSearch, a Search Engine", a: `Yes: ${IRIS_REPO}` },
-    ],
-  },
-  {
-    q: "Book a call with Shahzaib",
-    a: `Quickest route: WhatsApp ${CONTACT.phone}, or email ${CONTACT.email}. He works from Islamabad (PKT).`,
-    actions: ["whatsapp", "email"],
-    more: [
-      { q: "What’s the fastest way to reach him?", a: `WhatsApp, on ${CONTACT.phone}.`, actions: ["whatsapp"] },
-      { q: "Can I email instead?", a: `Of course: ${CONTACT.email}. Replies usually land within a day.`, actions: ["email"] },
-      { q: "What timezone is he in?", a: "Pakistan time (PKT). He works from Islamabad." },
-    ],
-  },
-];
 // The idea form is a short exchange: the agent asks for the message, then for a way to reach
 // back, and only then sends the two together.
 const IDEA_ASK = "What do you want done? Type it out below.";
@@ -211,10 +167,10 @@ async function sendIdea(idea: string, contact: string): Promise<boolean> {
 const CHAT = { THINK_DELAY: 280, THINK: 620, TYPE_TICK: 18, TYPE_CHARS: 2, CHIP_STAGGER: 45, SCROLL_S: 0.9, FOLLOW_LERP: 0.16 };
 // the chat opens on one of these, picked at random
 const INTROS = [
-  "Hey, I’m a resident here. I don’t waste other’s time so I put quick options here.",
-  "Oh good, a visitor. I know this guy so ask me anything about him here.",
-  "Hi. Noticed you scrolling around before. What would you like to know?",
-  "Congratulations on clicking me. Now pick a topic below and let’s talk.",
+  "Hey, I’m a resident here. Ask me anything about Shahzaib from the options below and I will answer honestly.",
+  "Oh good, a visitor. I know a lot about Shahzaib so ask me anything about him using the buttons below.",
+  "Hi. Noticed you scrolling around before. Would you like to know anything about Shahzaib?\n\nUse the buttons below to ask me questions.",
+  "Congratulations on clicking me. Let’s talk about Shahzaib since this is his portfolio.\n\nAsk me anything from the options below.",
 ];
 const pickIntro = () => INTROS[Math.floor(Math.random() * INTROS.length)];
 
@@ -288,10 +244,68 @@ function rr(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: n
   ctx.closePath();
 }
 
+// The chat's live marker morphs between these outlines. Each is a polygon in a 0..1 box
+// (null is the circle), resampled to the same number of points so one can ease into another.
+const MARKER_SHAPES: ([number, number][] | null)[] = [
+  null,
+  [[0.07, 0.07], [0.93, 0.07], [0.93, 0.93], [0.07, 0.93]], // square
+  [[0.5, 0.04], [1, 0.92], [0, 0.92]], // triangle
+  [[0.5, 0], [1, 0.5], [0.5, 1], [0, 0.5]], // diamond
+  [[0.33, 0], [0.67, 0], [0.67, 0.33], [1, 0.33], [1, 0.67], [0.67, 0.67], [0.67, 1], [0.33, 1], [0.33, 0.67], [0, 0.67], [0, 0.33], [0.33, 0.33]], // plus
+];
+const MARKER = { POINTS: 72, EVERY_MS: 1500, MORPH_MS: 800, EASE: "cubic-bezier(0.65, 0, 0.35, 1)" };
+
+/** A shape's outline as a clip-path: rays cast from the centre, one per point. */
+function markerOutline(verts: [number, number][] | null) {
+  const pts: string[] = [];
+  for (let i = 0; i < MARKER.POINTS; i++) {
+    const th = (i / MARKER.POINTS) * Math.PI * 2 - Math.PI / 2;
+    const dx = Math.cos(th), dy = Math.sin(th);
+    let r = verts ? 0 : 0.5;
+    verts?.forEach(([ax, ay], j) => {
+      const [bx, by] = verts[(j + 1) % verts.length];
+      const ex = bx - ax, ey = by - ay;
+      const den = dx * ey - dy * ex;
+      if (Math.abs(den) < 1e-9) return;
+      const t = ((ax - 0.5) * ey - (ay - 0.5) * ex) / den;
+      const u = ((ax - 0.5) * dy - (ay - 0.5) * dx) / den;
+      if (t > 0 && u >= -1e-9 && u <= 1 + 1e-9) r = Math.max(r, t);
+    });
+    pts.push(`${((0.5 + dx * r) * 100).toFixed(2)}% ${((0.5 + dy * r) * 100).toFixed(2)}%`);
+  }
+  return `polygon(${pts.join(",")})`;
+}
+const MARKER_OUTLINES = MARKER_SHAPES.map(markerOutline);
+
+/** The yellow marker in the chat header: it keeps turning into another shape, never the same one twice running. */
+function LiveMarker() {
+  const [step, setStep] = useState({ shape: 0, turns: 0 });
+  useEffect(() => {
+    const id = setInterval(() => {
+      setStep((prev) => {
+        // pick among the other shapes, so the next one always differs
+        const next = (prev.shape + 1 + Math.floor(Math.random() * (MARKER_OUTLINES.length - 1))) % MARKER_OUTLINES.length;
+        return { shape: next, turns: prev.turns + 1 };
+      });
+    }, MARKER.EVERY_MS);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <span
+      className="size-2.5 bg-accent"
+      style={{
+        clipPath: MARKER_OUTLINES[step.shape],
+        transform: `rotate(${step.turns * 360}deg)`,
+        transition: `clip-path ${MARKER.MORPH_MS}ms ${MARKER.EASE}, transform ${MARKER.MORPH_MS}ms ${MARKER.EASE}`,
+      }}
+    />
+  );
+}
+
 const FIELD =
-  "w-full rounded-xl border border-on-ink/20 bg-on-ink/5 px-3.5 py-3 text-[15px] leading-[22px] text-background outline-none transition-colors duration-150 placeholder:text-on-ink/45 focus:border-on-ink/60";
+  "w-full border border-on-ink/20 bg-on-ink/5 px-3.5 py-3 text-[15px] leading-[22px] tracking-normal text-background outline-none transition-colors duration-150 placeholder:text-on-ink/45 focus:border-on-ink/60";
 const ACTION =
-  "rounded-full bg-accent px-3.5 py-1.5 text-sm font-semibold tracking-[-0.2px] text-black transition-opacity duration-150 hover:opacity-85";
+  "rounded-full bg-accent px-3.5 py-1.5 text-sm font-semibold tracking-normal text-black transition-opacity duration-150 hover:opacity-85";
 
 /** One question of the idea form, as it sits inside the agent's bubble: a box to type in and a Done button. */
 function IdeaField({
@@ -366,7 +380,9 @@ function AgentChat({ start, closeButton, onClose }: { start: ChatStart; closeBut
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState<string | null>(null); // the reply being typed; "" is the thinking dots
   const [busy, setBusy] = useState(true);
-  const [topic, setTopic] = useState<Topic | null>(null);
+  // the questions opened so far, outermost first; the last one's follow-ups are the menu on show
+  const [path, setPath] = useState<Topic[]>([]);
+  const topic = path.at(-1) ?? null;
   const [ideas, setIdeas] = useState<Idea[]>([NEW_IDEA]); // run 0 belongs to the opening, when it is the form
   const msgsRef = useRef<HTMLDivElement>(null);
   const timers = useRef<number[]>([]);
@@ -434,7 +450,7 @@ function AgentChat({ start, closeButton, onClose }: { start: ChatStart; closeBut
   const ask = (t: Topic) => {
     setMessages((prev) => [...prev, { from: "you", text: t.q }]);
     // go a level deeper, or back to the primary questions when this one is a dead end
-    setTopic(t.more ? t : null);
+    setPath((prev) => (t.more ? [...prev, t] : []));
     setBusy(true);
     const actions = t.actions?.filter((x) => x !== "form");
     if (t.actions?.includes("form")) {
@@ -443,7 +459,8 @@ function AgentChat({ start, closeButton, onClose }: { start: ChatStart; closeBut
       typeOut(t.a, { actions, field: { run: ideas.length, kind: "idea" } });
     } else typeOut(t.a, { actions });
   };
-  const back = () => setTopic(null);
+  const back = () => setPath((prev) => prev.slice(0, -1));
+  const toMenu = () => setPath([]);
 
   const setIdea = (run: number, patch: Partial<Idea>) =>
     setIdeas((prev) => prev.map((x, i) => (i === run ? { ...x, ...patch } : x)));
@@ -469,7 +486,7 @@ function AgentChat({ start, closeButton, onClose }: { start: ChatStart; closeBut
   // the reply in progress shares the key its finished bubble will get, so it never re-animates
   const shown: Message[] = draft === null ? messages : [...messages, { from: "bot", text: draft }];
   const options = topic?.more ?? TOPICS;
-  const chip = "agent-in rounded-full border px-3.5 py-2 text-sm tracking-[-0.2px] transition-colors duration-150";
+  const chip = "agent-in rounded-full border px-3.5 py-2 text-sm tracking-normal transition-colors duration-150";
 
   return (
     <div
@@ -479,19 +496,19 @@ function AgentChat({ start, closeButton, onClose }: { start: ChatStart; closeBut
     >
       <div
         role="dialog"
-        aria-label="Live session"
-        className="flex h-[min(560px,calc(100dvh-32px))] w-[min(560px,calc(100vw-32px))] flex-col overflow-hidden rounded-[20px] border border-[#84BDFF] bg-ink text-background shadow-[0_30px_80px_rgba(21,22,18,0.35)]"
+        aria-label="Chat Session"
+        className="flex h-[min(560px,calc(100dvh-32px))] w-[min(560px,calc(100vw-32px))] flex-col overflow-hidden border border-accent bg-ink text-background shadow-[0_30px_80px_rgba(21,22,18,0.35)]"
       >
         <div className="flex items-center justify-between border-b border-on-ink/12 px-[22px] py-2.5">
-          <span className="flex items-center gap-2.5 font-mono text-xs font-medium tracking-[0.08em] uppercase">
-            <span className="size-2 rounded-full bg-[#03AC47]" />
-            Mascot · Live session
+          <span className="flex items-center gap-2.5 text-[12px] tracking-[0.08em] text-on-ink/80 uppercase">
+            <LiveMarker />
+            Session with the site mascot
           </span>
           {closeButton ? (
             <button
               type="button"
               onClick={onClose}
-              className="my-2 rounded-full border border-on-ink/20 px-3.5 py-2 font-mono text-xs tracking-[0.08em] text-on-ink/70 uppercase"
+              className="my-2 rounded-full border border-on-ink/20 px-3.5 py-2 text-sm tracking-normal text-on-ink/80 transition-colors duration-150 hover:border-accent hover:text-accent"
             >
               Close
             </button>
@@ -508,7 +525,7 @@ function AgentChat({ start, closeButton, onClose }: { start: ChatStart; closeBut
               return (
                 <div
                   key={i}
-                  className={`agent-in whitespace-pre-line rounded-[14px] px-4 py-3 text-[15px] leading-[22px] tracking-[-0.2px] ${
+                  className={`agent-in whitespace-pre-line px-4 py-3 text-[15px] leading-[22px] tracking-normal ${
                     m.from === "bot" ? "self-start bg-on-ink/8 text-background" : "self-end bg-accent text-black"
                   } ${field ? "w-full" : "max-w-[82%]"}`}
                 >
@@ -543,7 +560,7 @@ function AgentChat({ start, closeButton, onClose }: { start: ChatStart; closeBut
         </div>
         {/* while a reply is typing the next menu holds its space unseen, then its pills rise in one by one */}
         <div
-          key={`${topic?.q ?? "menu"}-${busy}`}
+          key={`${path.length}-${topic?.q ?? "menu"}-${busy}`}
           className={`flex flex-wrap gap-2 border-t border-on-ink/12 px-[22px] pt-4 pb-[22px] ${busy ? "pointer-events-none invisible" : ""}`}
         >
           {options.map((t, i) => (
@@ -551,22 +568,27 @@ function AgentChat({ start, closeButton, onClose }: { start: ChatStart; closeBut
               key={t.q}
               type="button"
               onClick={() => ask(t)}
-              className={`${chip} border-on-ink/25 text-background hover:border-on-ink/70`}
+              className={`${chip} border-on-ink/25 text-background hover:border-accent hover:text-accent`}
               style={{ animationDelay: `${i * CHAT.CHIP_STAGGER}ms` }}
             >
               {t.q}
             </button>
           ))}
-          {topic ? (
+          {/* one level up; from deeper than that, also straight back to the primary questions */}
+          {[
+            ...(path.length > 1 ? [{ label: "← Back", go: back }] : []),
+            ...(path.length ? [{ label: path.length > 1 ? "Back to menu" : "← Back to menu", go: toMenu }] : []),
+          ].map((b, i) => (
             <button
+              key={b.label}
               type="button"
-              onClick={back}
-              className={`${chip} border-transparent bg-on-ink/10 text-on-ink/80 hover:bg-on-ink/20`}
-              style={{ animationDelay: `${options.length * CHAT.CHIP_STAGGER}ms` }}
+              onClick={b.go}
+              className={`${chip} border-transparent bg-on-ink/10 text-on-ink/80 hover:border-accent hover:text-accent`}
+              style={{ animationDelay: `${(options.length + i) * CHAT.CHIP_STAGGER}ms` }}
             >
-              ← Back to menu
+              {b.label}
             </button>
-          ) : null}
+          ))}
         </div>
       </div>
     </div>
@@ -643,39 +665,37 @@ export default function SiteAgent() {
     let wasNear = false;
     let restSince = 0;
     let lastT = 0;
-    const blink = { next: 0, start: -1, again: false };
-    const cursor = { x: vw / 2, y: vh / 2, w: TUNE.CURSOR_DOT_PX, h: TUNE.CURSOR_DOT_PX, fill: 1 };
+    let blinkAt = performance.now() + TUNE.BLINK_FIRST_MS; // the moment the eyes are fully shut
+    let blinkAgain = Math.random() < TUNE.DOUBLE_BLINK_CHANCE;
+    const cursor = { x: vw / 2, y: vh / 2, w: TUNE.CURSOR_DOT_PX, h: TUNE.CURSOR_DOT_PX, fill: 1, tone: 0 }; // tone: 0 dark cursor, 1 light
     let mouse: { x: number; y: number } | null = null;
-    let hoverLabel: string | null = null, hoverRing = false, inModal = false;
+    let hoverLabel: string | null = null, hoverRing = false, inModal = false, inText = false, onDark = false, groundAt = 0;
+    let agentTone = 0; // 0 ink body, 1 accent body
+    let dizzyUntil = 0, dizzyMeter = 0, mouseTravel = 0, lastScrollY = scrollY;
 
     const say = (text: string, force = false) => {
+      if (saidOnce.has(text)) return;
       const now = performance.now();
       if (!force && now - lastTipAt < TUNE.TIP_COOLDOWN_MS) return;
       tip = { text, start: now };
       lastTipAt = now;
+      if (ONCE_LINES.has(text)) saidOnce.add(text);
     };
 
-    const scheduleBlink = (now: number) => {
-      blink.next = now + TUNE.BLINK_MIN_MS + Math.random() * (TUNE.BLINK_MAX_MS - TUNE.BLINK_MIN_MS);
-      blink.again = Math.random() < TUNE.DOUBLE_BLINK_CHANCE;
-    };
-    const blinkAmount = (now: number) => {
-      if (blink.start < 0 && now >= blink.next) blink.start = now;
-      if (blink.start < 0 || now < blink.start) return 0;
-      const d = now - blink.start, shut = TUNE.BLINK_CLOSE_MS;
-      if (d < 60) return d / 60;
-      if (d < 60 + shut) return 1;
-      if (d < 120 + shut) return 1 - (d - 60 - shut) / 60;
-      if (blink.again) {
-        blink.again = false;
-        blink.start = now + 90;
-      } else {
-        blink.start = -1;
-        scheduleBlink(now);
+    /** How open the eyes are, 1 to 0 and back: a triangle wave around blinkAt. */
+    const eyeOpenness = (now: number) => {
+      if (now > blinkAt + TUNE.BLINK_HALF_MS) {
+        if (blinkAgain) {
+          blinkAgain = false;
+          blinkAt = now + TUNE.DOUBLE_BLINK_GAP_MS + TUNE.BLINK_HALF_MS;
+        } else {
+          blinkAt = now + TUNE.BLINK_GAP_MS + Math.random() * TUNE.BLINK_GAP_RAND_MS;
+          blinkAgain = Math.random() < TUNE.DOUBLE_BLINK_CHANCE;
+        }
       }
-      return 0;
+      const d = Math.abs(blinkAt - now);
+      return d < TUNE.BLINK_HALF_MS ? d / TUNE.BLINK_HALF_MS : 1;
     };
-    scheduleBlink(performance.now());
 
     // which [data-section] owns a given screen y
     const locate = (y: number) => {
@@ -731,11 +751,11 @@ export default function SiteAgent() {
       };
     };
 
-    const drawAgent = (x: number, y: number, R: number, dark: boolean, look: { x: number; y: number }, blinkAmt: number, t: number) => {
+    const drawAgent = (x: number, y: number, R: number, dark: boolean, body: string, look: { x: number; y: number }, openness: number, dizzy: boolean, t: number) => {
       const huge = R * 2 >= TUNE.HUGE_FROM * ss;
       ctx.save();
       ctx.translate(x, y);
-      ctx.fillStyle = dark ? ACCENT : INK;
+      ctx.fillStyle = body;
       const k = R / 25;
       for (let i = 0; i < dots.length; i++) {
         const p = dots[i];
@@ -750,19 +770,33 @@ export default function SiteAgent() {
       ctx.globalAlpha = 1;
 
       // nose sits behind the eyes: a fixed 20px circle, or a big oval when huge
-      ctx.fillStyle = dark ? ACCENT : INK;
+      ctx.fillStyle = body;
       ctx.beginPath();
       if (huge) ctx.ellipse(0, 0.2 * R, 0.2 * R, 0.15 * R, 0, 0, 6.283);
       else ctx.arc(0, 0.2 * R, (TUNE.NOSE_PX * ss) / 2, 0, 6.283);
       ctx.fill();
 
       const gap = 0.34 * R, er = 0.26 * R, pr = er * 0.52;
-      const lid = Math.max(blinkAmt, huge ? TUNE.HUGE_LID : 0);
       for (const side of [-1, 1]) {
         const ex = side * gap, ey = -0.06 * R;
         ctx.save();
+        ctx.translate(ex, ey);
+        if (openness < TUNE.BLINK_MIN_OPEN) {
+          // shut: the eye is just its lid, a short line in the eye's own white
+          ctx.strokeStyle = "#FFFFFF";
+          ctx.lineWidth = TUNE.BLINK_LINE_PX;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(-er * TUNE.BLINK_LINE_SPAN, 0);
+          ctx.lineTo(er * TUNE.BLINK_LINE_SPAN, 0);
+          ctx.stroke();
+          ctx.restore();
+          continue;
+        }
+        // a blink squashes the whole eye vertically about its centre
+        ctx.scale(1, openness);
         ctx.beginPath();
-        ctx.arc(ex, ey, er, 0, 6.283);
+        ctx.arc(0, 0, er, 0, 6.283);
         ctx.fillStyle = "#FFFFFF";
         ctx.fill();
         if (!dark) {
@@ -771,19 +805,32 @@ export default function SiteAgent() {
           ctx.stroke();
         }
         ctx.clip();
-        if (lid < 0.95) {
+        if (dizzy) {
+          // dizzy: the pupil gives way to a spinning spiral (radius grows evenly with the angle), the two eyes turning opposite ways
+          const coil = TUNE.DIZZY_TURNS * 6.283, spin = t * TUNE.DIZZY_SPIN;
+          ctx.strokeStyle = INK;
+          ctx.lineWidth = Math.max(1, er * 0.13);
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          for (let a = 0; a <= coil; a += 0.2) {
+            const r = (a / coil) * er * 0.82, at = (a + spin) * side;
+            ctx.lineTo(Math.cos(at) * r, Math.sin(at) * r);
+          }
+          ctx.stroke();
+        } else {
           const dx = look.x - (x + ex), dy = look.y - (y + ey);
           const d = Math.hypot(dx, dy) || 1;
           const m = Math.min(1, d / 120) * (er - pr - 0.6);
           ctx.fillStyle = INK;
           ctx.beginPath();
-          ctx.arc(ex + (dx / d) * m, ey + (dy / d) * m, pr, 0, 6.283);
+          // the pupil squashes with the eye, but its height offset is divided back so it does not sink to the middle
+          ctx.arc((dx / d) * m, ((dy / d) * m) / Math.max(TUNE.BLINK_PUPIL_HOLD, openness), pr, 0, 6.283);
           ctx.fill();
         }
-        // lids drop from the top: a blink shuts them, the huge state rests half-closed
-        if (lid > 0) {
+        // the huge state rests with its lids half down
+        if (huge) {
           ctx.fillStyle = INK;
-          ctx.fillRect(ex - er, ey - er, er * 2, er * 2 * lid);
+          ctx.fillRect(-er, -er, er * 2, er * 2 * TUNE.HUGE_LID);
         }
         ctx.restore();
       }
@@ -803,7 +850,8 @@ export default function SiteAgent() {
       const fade = age > life ? 1 - (age - life) / TUNE.TIP_FADE_MS : 1;
       const pop = 0.85 + 0.15 * EASE(clamp(age / TUNE.TIP_POP_MS, 0, 1));
       ctx.save();
-      ctx.font = `700 14px ${sans}`;
+      ctx.font = `400 14px ${sans}`;
+      ctx.letterSpacing = TUNE.TIP_SPACING;
       const w = Math.ceil(ctx.measureText(tip.text).width) + 28, h = 36;
       const bx = clamp(pos.x - w / 2, 16, vw - 16 - w);
       const below = pos.y - R - 18 - h < 100;
@@ -844,45 +892,97 @@ export default function SiteAgent() {
       ctx.restore();
     };
 
+    // a 1px scratch canvas: reads any CSS colour string, or one pixel of an image or video frame
+    const probe = document.createElement("canvas");
+    probe.width = probe.height = 1;
+    const pctx = probe.getContext("2d", { willReadFrequently: true });
+    const cssColors = new Map<string, Uint8ClampedArray>();
+    const cssColor = (value: string) => {
+      let c = cssColors.get(value);
+      if (!c && pctx) {
+        pctx.clearRect(0, 0, 1, 1);
+        pctx.fillStyle = value;
+        pctx.fillRect(0, 0, 1, 1);
+        c = pctx.getImageData(0, 0, 1, 1).data;
+        cssColors.set(value, c);
+      }
+      return c;
+    };
+    /** How bright the page is at this point, 0 to 1. Walks down the stack to the first thing that paints there. */
+    const groundLuminance = (x: number, y: number) => {
+      if (!pctx) return 1;
+      for (const el of document.elementsFromPoint(x, y)) {
+        if (el instanceof HTMLImageElement || el instanceof HTMLVideoElement) {
+          const video = el instanceof HTMLVideoElement;
+          const nw = video ? el.videoWidth : el.naturalWidth, nh = video ? el.videoHeight : el.naturalHeight;
+          if (!nw || !nh) continue;
+          // media here is object-cover: scaled to fill its box and centred
+          const r = el.getBoundingClientRect();
+          const scale = Math.max(r.width / nw, r.height / nh);
+          const sx = (x - r.left - (r.width - nw * scale) / 2) / scale;
+          const sy = (y - r.top - (r.height - nh * scale) / 2) / scale;
+          try {
+            pctx.clearRect(0, 0, 1, 1);
+            pctx.drawImage(el, clamp(sx, 0, nw - 1), clamp(sy, 0, nh - 1), 1, 1, 0, 0, 1, 1);
+            const d = pctx.getImageData(0, 0, 1, 1).data;
+            if (d[3] > 127) return luminance(d[0], d[1], d[2]);
+          } catch {
+            // a cross-origin image cannot be read; fall through to what is behind it
+          }
+          continue;
+        }
+        const c = cssColor(getComputedStyle(el).backgroundColor);
+        // mostly see-through layers (the chat's dimmed backdrop, faint tints) do not count as ground
+        if (c && c[3] > 127) return luminance(c[0], c[1], c[2]);
+      }
+      return 1;
+    };
+
     const drawCursor = (open: boolean, R: number, dt: number) => {
-      if (!mouse || inModal || !pos) return;
+      if (!mouse || !pos) return;
+      if (inModal) {
+        // not drawn here, but kept under the pointer so it never flies in from where it last was
+        cursor.x = mouse.x;
+        cursor.y = mouse.y;
+        return;
+      }
+      const at = performance.now();
+      if (at - groundAt > CURSOR_GROUND_MS) {
+        groundAt = at;
+        onDark = groundLuminance(mouse.x, mouse.y) < CURSOR_FLIP_AT;
+      }
+      cursor.tone += ((onDark ? 1 : 0) - cursor.tone) * (1 - Math.exp(-dt / (CURSOR_TONE_MS / 3)));
       cursor.x += (mouse.x - cursor.x) * 0.35;
       cursor.y += (mouse.y - cursor.y) * 0.35;
       const talk = !open && Math.hypot(mouse.x - pos.x, mouse.y - pos.y) < R + TUNE.NEAR_PX * 0.6;
       // dot by default; a hollow ring over [CURSOR_RING] targets; a capsule with
-      // text over the agent ("talk") and over anything with [data-cursor-label]
-      const label = open ? null : talk ? "TALK" : hoverLabel;
-      const ring = !open && !label && hoverRing;
+      // text over the agent ("talk") and over anything with [data-cursor-label];
+      // a thin upright bar over text fields
+      const label = open || inText ? null : talk ? "TALK" : hoverLabel;
+      const ring = !open && !inText && !label && hoverRing;
       ctx.save();
       ctx.font = `400 15px ${sans}`;
       ctx.letterSpacing = TUNE.CURSOR_LABEL_SPACING;
-      const T = label ? [Math.ceil(ctx.measureText(label).width) + 36, 38] : ring ? [TUNE.CURSOR_RING_PX, TUNE.CURSOR_RING_PX] : [TUNE.CURSOR_DOT_PX, TUNE.CURSOR_DOT_PX];
+      const T = label ? [Math.ceil(ctx.measureText(label).width) + 36, 38] : ring ? [TUNE.CURSOR_RING_PX, TUNE.CURSOR_RING_PX] : inText ? [TUNE.CURSOR_BAR_W, TUNE.CURSOR_BAR_H] : [TUNE.CURSOR_DOT_PX, TUNE.CURSOR_DOT_PX];
       const k = 1 - Math.exp(-dt / (TUNE.CURSOR_MS / 3));
       cursor.w += (T[0] - cursor.w) * k;
       cursor.h += (T[1] - cursor.h) * k;
       cursor.fill += ((ring ? 0 : 1) - cursor.fill) * k;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      // a white shape with an ink border; the hollow ring swaps the fill for a thin
-      // white line inside the border, so it still shows on dark ground
-      rr(ctx, cursor.x - cursor.w / 2, cursor.y - cursor.h / 2, cursor.w, cursor.h, cursor.h / 2);
-      ctx.fillStyle = CURSOR_FILL;
+      // one solid colour, picked against the ground; the hollow ring keeps only the outline
+      const mix = (t: number) => mixRgb(CURSOR_RGB.ink, CURSOR_RGB.fill, t);
+      const ink = mix(cursor.tone);
+      rr(ctx, cursor.x - cursor.w / 2, cursor.y - cursor.h / 2, cursor.w, cursor.h, Math.min(cursor.w, cursor.h) / 2);
+      ctx.fillStyle = ink;
       ctx.globalAlpha = cursor.fill;
       ctx.fill();
       ctx.globalAlpha = 1;
-      ctx.strokeStyle = CURSOR_INK;
+      ctx.strokeStyle = ink;
       ctx.lineWidth = TUNE.CURSOR_BORDER_PX;
       ctx.stroke();
-      if (cursor.fill < 0.99) {
-        const i = TUNE.CURSOR_BORDER_PX;
-        rr(ctx, cursor.x - cursor.w / 2 + i, cursor.y - cursor.h / 2 + i, cursor.w - i * 2, cursor.h - i * 2, cursor.h / 2 - i);
-        ctx.strokeStyle = CURSOR_FILL;
-        ctx.globalAlpha = 1 - cursor.fill;
-        ctx.stroke();
-        ctx.globalAlpha = 1;
-      }
       if (label && cursor.w > T[0] * 0.8) {
-        ctx.fillStyle = CURSOR_INK;
+        ctx.fillStyle = mix(1 - cursor.tone);
         ctx.fillText(label, cursor.x, cursor.y + 0.5);
       }
       ctx.restore();
@@ -895,6 +995,21 @@ export default function SiteAgent() {
       const step = clamp(dt / 1000, 0.001, 0.05); // seconds, for the springs
       lastT = now;
       const open = chatOpenRef.current;
+
+      // moving the pointer or the page too fast for a moment makes the agent dizzy
+      const mouseSpeed = dt > 0 ? (mouseTravel / dt) * 1000 : 0;
+      const scrollSpeed = dt > 0 ? (Math.abs(scrollY - lastScrollY) / dt) * 1000 : 0;
+      mouseTravel = 0;
+      lastScrollY = scrollY;
+      const rushing = mouseSpeed > TUNE.DIZZY_MOUSE_SPEED || scrollSpeed > TUNE.DIZZY_SCROLL_SPEED;
+      // fills while rushing and drains at half the pace, so a shake's brief reversals still add up
+      dizzyMeter = clamp(dizzyMeter + (rushing ? dt : -dt / 2), 0, TUNE.DIZZY_HOLD_MS);
+      if (!open && dizzyMeter >= TUNE.DIZZY_HOLD_MS && now > dizzyUntil + TUNE.DIZZY_COOLDOWN_MS) {
+        dizzyUntil = now + TUNE.DIZZY_MS;
+        dizzyMeter = 0;
+        say(DIZZY_LINES[Math.floor(Math.random() * DIZZY_LINES.length)], true);
+      }
+      const dizzy = now < dizzyUntil;
 
       const { sec, rect, el } = locate(vh * TUNE.ACTIVE_LINE);
       if (!open && secId !== sec.id) {
@@ -943,20 +1058,22 @@ export default function SiteAgent() {
       if (mouse && !open) {
         const d = Math.hypot(mouse.x - pos.x, mouse.y - pos.y);
         const near = d < R + TUNE.NEAR_PX;
-        if (near && !wasNear) say(NEAR_LINES[Math.floor(Math.random() * NEAR_LINES.length)]);
+        if (near && !wasNear && Math.random() < TUNE.NEAR_CHANCE) say(NEAR_LINES[Math.floor(Math.random() * NEAR_LINES.length)]);
         wasNear = near;
         if (d < R + 10 && now - restSince > TUNE.REST_MS) {
-          say(REST_LINES[Math.floor(Math.random() * REST_LINES.length)]);
+          if (Math.random() < TUNE.REST_CHANCE) say(REST_LINES[Math.floor(Math.random() * REST_LINES.length)]);
           restSince = now + 1e9;
         }
       }
 
-      const dark = open || locate(clamp(pos.y, 0, vh - 1)).sec.dark;
+      const agentDark = open || !!locate(clamp(pos.y, 0, vh - 1)).sec.dark;
+      agentTone += ((agentDark ? 1 : 0) - agentTone) * (1 - Math.exp(-dt / (AGENT_TONE_MS / 3)));
+      const dark = agentTone > 0.5;
       const look = mouse ?? { x: pos.x, y: pos.y + 40 };
 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, vw, vh);
-      drawAgent(pos.x, pos.y, R, dark, look, blinkAmount(now), now);
+      drawAgent(pos.x, pos.y, R, dark, mixRgb(AGENT_RGB.ink, AGENT_RGB.accent, agentTone), look, dizzy ? 1 : eyeOpenness(now), dizzy, now);
       drawTip(now, dark, R);
       drawCursor(open, R, dt);
 
@@ -971,12 +1088,14 @@ export default function SiteAgent() {
     const onMove = (e: MouseEvent) => {
       const m = { x: e.clientX, y: e.clientY };
       if (!mouse || Math.hypot(m.x - mouse.x, m.y - mouse.y) > 3) restSince = performance.now();
+      if (mouse) mouseTravel += Math.hypot(m.x - mouse.x, m.y - mouse.y);
       mouse = m;
       const t = e.target instanceof Element ? e.target : null;
       hoverLabel = t?.closest<HTMLElement>("[data-cursor-label]")?.dataset.cursorLabel ?? null;
       hoverRing = !!t?.closest(CURSOR_RING);
-      // dialogs and text fields keep the real cursor
-      inModal = !!t?.closest('[aria-modal="true"], textarea, input');
+      inText = !!t?.closest("textarea, input");
+      // dialogs keep the real cursor
+      inModal = !inText && !!t?.closest('[aria-modal="true"]');
     };
     const onLeave = () => {
       mouse = null;

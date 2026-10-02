@@ -12,12 +12,18 @@ const LINKS = [
 
 // Past this scroll depth the header collapses into a small bar; one threshold, both ways.
 const COLLAPSE_AT = 100;
-const PANEL = "750ms cubic-bezier(0.28, 0, 0, 1)";
-const SLIDE = "650ms cubic-bezier(0.36, 0.54, 0, 0.99)";
-const LINK_DELAYS = [100, 117, 150, 183]; // ms, in link order
+// The small bar leaves once the paper layer's bottom edge (the end of Testimonials) is this
+// close to the top of the viewport, just before Contact's yellow would show behind it.
+const LEAVE_AT = 280;
+const LEAVE = "450ms cubic-bezier(0.5, 0, 0.75, 0)"; // accelerates away
+const RETURN = "600ms cubic-bezier(0.22, 1, 0.36, 1)"; // settles back in
+const PANEL = "480ms cubic-bezier(0.28, 0, 0, 1)";
+const SLIDE = "420ms cubic-bezier(0.36, 0.54, 0, 0.99)";
+const LINK_DELAYS = [64, 75, 96, 117]; // ms, in link order
+const CLOCK_DELAY = 138; // ms, after the last link
 const LINKS_SHIFT = 255; // px the links slide left as they go
 // the collapsed bar, in px
-const MINI = { inset: 16, height: 48, radius: 4, padLeft: 14, padRight: 8, gap: 16, dotBox: 24, logoScale: 0.6 };
+const MINI = { inset: 16, height: 48, radius: 0, padLeft: 14, padRight: 8, gap: 16, dotBox: 24, logoScale: 0.6 };
 
 const pkTime = () =>
   new Intl.DateTimeFormat("en-GB", {
@@ -49,11 +55,16 @@ function Clock() {
 
 export default function SiteHeader() {
   const [collapsed, setCollapsed] = useState(false);
+  const [gone, setGone] = useState(false);
   const [logoW, setLogoW] = useState(180);
   const logoRef = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {
-    const onScroll = () => setCollapsed(scrollY > COLLAPSE_AT);
+    const paperEnd = document.getElementById("testimonials");
+    const onScroll = () => {
+      setCollapsed(scrollY > COLLAPSE_AT);
+      setGone(paperEnd ? paperEnd.getBoundingClientRect().bottom < LEAVE_AT : false);
+    };
     onScroll();
     addEventListener("scroll", onScroll, { passive: true });
     return () => removeEventListener("scroll", onScroll);
@@ -76,7 +87,15 @@ export default function SiteHeader() {
     // keeps its 88px in the flow so nothing below shifts; only its children take clicks
     <header
       className="pointer-events-none sticky top-0 z-50 h-[88px]"
-      style={{ "--pad": "clamp(16px,2.22vw,32px)" } as CSSProperties}
+      style={
+        {
+          "--pad": "clamp(16px,2.22vw,32px)",
+          // past the paper layer the bar lifts out of the top of the screen, and drops back on the way up
+          transform: `translateY(${gone ? -(MINI.inset + MINI.height + 12) : 0}px)`,
+          opacity: gone ? 0 : 1,
+          transition: `transform ${gone ? LEAVE : RETURN}, opacity ${gone ? LEAVE : RETURN}`,
+        } as CSSProperties
+      }
     >
       {/* the solid panel: a full-width strip at the top of the page, a small bar once scrolled */}
       <div
@@ -101,7 +120,7 @@ export default function SiteHeader() {
           width: MINI.dotBox,
           height: MINI.dotBox,
           transform: `scale(${collapsed ? 1 : 0})`,
-          transition: collapsed ? "transform 333ms cubic-bezier(0.38, 0.02, 0.41, 0.98) 400ms" : "transform 0ms",
+          transition: collapsed ? "transform 216ms cubic-bezier(0.38, 0.02, 0.41, 0.98) 256ms" : "transform 0ms",
         }}
       >
         <span className="size-1 rounded-full bg-foreground-faint" />
@@ -110,51 +129,49 @@ export default function SiteHeader() {
         <Link
           ref={logoRef}
           href="#top"
-          className="pointer-events-auto origin-left font-logo text-[clamp(32px,3.2vw,46px)] leading-[60px] font-normal tracking-[-0.5px] italic"
+          tabIndex={gone ? -1 : undefined}
+          className="pointer-events-auto origin-left font-logo text-[clamp(32px,3.2vw,46px)] leading-[60px] tracking-[-0.5px] italic"
           style={{
             transform: collapsed
               ? `translate(calc(${MINI.inset + MINI.padLeft}px - var(--pad)), ${MINI.inset + MINI.height / 2 - 44}px) scale(${MINI.logoScale})`
               : "none",
-            transition: `transform ${SLIDE}`,
+            // shrunk into the small bar the hairlines get too faint, so it takes one step more weight
+            fontWeight: collapsed ? 300 : 200,
+            transition: `transform ${SLIDE}, font-weight ${SLIDE}`,
           }}
         >
           Shahzaib
         </Link>
-        <div className="flex items-center gap-[34px]">
-          <div
-            className={`flex items-center gap-[34px] ${collapsed ? "" : "pointer-events-auto"}`}
-            aria-hidden={collapsed}
-            style={{ transform: `translateX(${collapsed ? -LINKS_SHIFT : 0}px)`, transition: `transform ${SLIDE}` }}
+        <div
+          className={`flex items-center gap-[34px] ${collapsed ? "" : "pointer-events-auto"}`}
+          aria-hidden={collapsed}
+          style={{ transform: `translateX(${collapsed ? -LINKS_SHIFT : 0}px)`, transition: `transform ${SLIDE}` }}
+        >
+          {LINKS.map((link, i) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              tabIndex={collapsed ? -1 : undefined}
+              className="hidden text-xl leading-[30px] font-normal text-foreground md:inline"
+              // no fade: each link pops out (and back in) on its own delay
+              style={{ opacity: collapsed ? 0 : 1, transition: `opacity 0ms linear ${LINK_DELAYS[i]}ms` }}
+            >
+              {link.label}
+            </Link>
+          ))}
+          {/* the clock goes with the links, last in the sequence */}
+          <span
+            className="group relative cursor-default"
+            style={{ opacity: collapsed ? 0 : 1, transition: `opacity 0ms linear ${CLOCK_DELAY}ms` }}
           >
-            {LINKS.map((link, i) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                tabIndex={collapsed ? -1 : undefined}
-                className="hidden text-xl leading-[30px] font-normal text-foreground md:inline"
-                // no fade: each link pops out (and back in) on its own delay
-                style={{ opacity: collapsed ? 0 : 1, transition: `opacity 0ms linear ${LINK_DELAYS[i] ?? 216}ms` }}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-          <div className="pointer-events-auto relative">
-            {/* without the strip behind it, the clock gets its own solid chip */}
+            <Clock />
             <span
-              aria-hidden
-              className="absolute -inset-x-3 -inset-y-1.5 bg-background"
-              style={{
-                borderRadius: MINI.radius,
-                boxShadow: "0 0 0 1px var(--hairline)",
-                opacity: collapsed ? 1 : 0,
-                transition: `opacity 300ms linear ${collapsed ? 300 : 0}ms`,
-              }}
-            />
-            <span className="relative">
-              <Clock />
+              role="tooltip"
+              className="pointer-events-none absolute top-full right-0 mt-2 translate-y-1 bg-foreground px-2.5 py-1.5 text-xs leading-4 whitespace-nowrap text-background opacity-0 transition-[opacity,transform] duration-150 group-hover:translate-y-0 group-hover:opacity-100"
+            >
+              Local Time for Shahzaib
             </span>
-          </div>
+          </span>
         </div>
       </nav>
     </header>

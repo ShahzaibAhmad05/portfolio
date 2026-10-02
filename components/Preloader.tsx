@@ -70,7 +70,7 @@ export default function Preloader() {
           <path ref={pathRef} d={path(COVERED)} />
         </clipPath>
       </svg>
-      <span ref={markRef} className="font-logo text-[clamp(32px,8.4vw,130px)] leading-none font-normal tracking-[-0.02em] whitespace-nowrap italic text-foreground">
+      <span ref={markRef} className="font-logo text-[clamp(32px,8.4vw,130px)] leading-none font-extralight tracking-[-0.02em] whitespace-nowrap italic text-foreground">
         Shahzaib&rsquo;s Portfolio
       </span>
       {/* nothing would ever lift the cover without scripts */}

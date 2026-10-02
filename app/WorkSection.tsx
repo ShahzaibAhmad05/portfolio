@@ -17,24 +17,24 @@ export default function WorkSection() {
       <div className="mb-24 flex max-w-[751px] flex-col gap-3 md:ml-8">
         <span className="font-serif text-[18.18px] leading-[25.452px] italic">Selected works</span>
         <h2 className="font-serif text-[21.26px] leading-[25.512px] font-normal">
-          Things I built as side projects, being used by people
+          Things I built solo, being used by real people
         </h2>
       </div>
 
       <div className="flex flex-col gap-[76px] pb-20">
         {WORK.map((work) => (
           <Reveal key={work.title} from={FROM[work.align]} className={`w-full max-w-[760px] ${ALIGN[work.align]}`}>
-            <a
-              href={work.href}
-              target="_blank"
-              rel="noreferrer"
-              data-agent-stop
-              data-cursor-label="VIEW"
-              className="flex flex-col transition-opacity duration-200 ease-[cubic-bezier(0,0,0,1)] hover:opacity-85"
-            >
-              <div className="relative w-full overflow-hidden bg-surface" style={{ aspectRatio: work.ratio }}>
+            <div data-agent-stop className="flex flex-col">
+              <a
+                href={work.href}
+                target="_blank"
+                rel="noreferrer"
+                data-cursor-label="VIEW"
+                className="relative block w-full overflow-hidden bg-surface"
+                style={{ aspectRatio: work.ratio }}
+              >
                 <Image src={work.image} alt={`${work.title} preview`} fill sizes="(min-width: 800px) 760px, 100vw" className="object-cover" />
-              </div>
+              </a>
               <span className="mt-[18px] font-serif text-[18.18px] leading-[25.45px]">{work.title}</span>
               <p className="mb-[18px] text-lg leading-[28.8px]">
                 <CodeText text={work.summary} />
@@ -49,7 +49,7 @@ export default function WorkSection() {
                   </span>
                 ))}
               </div>
-            </a>
+            </div>
           </Reveal>
         ))}
       </div>

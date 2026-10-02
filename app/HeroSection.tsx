@@ -91,7 +91,7 @@ export default function HeroSection() {
     <section
       id="top"
       data-section="hero"
-      className="flex min-h-[calc(100svh-88px)] flex-col gap-12 border-b border-hairline px-[clamp(20px,9.72vw,140px)] pt-[clamp(48px,5.56vw,80px)] pb-[clamp(40px,4.44vw,64px)]"
+      className="flex min-h-[calc(100svh-88px)] flex-col gap-12 px-[clamp(20px,9.72vw,140px)] pt-[clamp(48px,5.56vw,80px)] pb-[clamp(40px,4.44vw,64px)]"
     >
       <h1 className="text-center text-[clamp(34px,3.85vw,55.43px)] leading-[1.1] font-normal tracking-[-0.02em]">
         A full-stack developer blitzing excellent design quality{" "}
@@ -99,7 +99,7 @@ export default function HeroSection() {
           with <RotatingWord />
         </span>
       </h1>
-      <div className="relative min-h-[320px] grow overflow-hidden rounded-[20px] bg-surface">
+      <div className="relative min-h-[320px] grow overflow-hidden bg-surface">
         <video
           className="absolute inset-0 h-full w-full object-cover"
           src="/video/hero-v2.mp4"

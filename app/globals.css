@@ -34,8 +34,12 @@
   --font-sans: var(--font-sans-face);
   --font-serif: var(--font-serif-face);
   --font-mono: var(--font-mono-face);
-  --font-ui: var(--font-ui-face);
   --font-logo: var(--font-logo-face);
+}
+
+/* the wordmark: Fraunces with soft terminals and its quirky alternate letterforms on */
+.font-logo {
+  font-variation-settings: "SOFT" 100, "WONK" 0;
 }
 
 body {
@@ -60,9 +64,12 @@ body {
 .agent-cursor [aria-modal="true"] * {
   cursor: auto !important;
 }
+/* text fields get the agent's own typing bar, even inside a dialog */
 .agent-cursor textarea,
-.agent-cursor input {
-  cursor: text !important;
+.agent-cursor input,
+.agent-cursor [aria-modal="true"] textarea,
+.agent-cursor [aria-modal="true"] input {
+  cursor: none !important;
 }
 
 /* the site agent's chat: things rise into place, and the typing dots pulse */

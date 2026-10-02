@@ -49,7 +49,7 @@ export const CRAFT_CARDS = [
   { src: "/craft/02-analyze.jpg", alt: "The attached files opened for analysis" },
   { src: "/craft/03-wireframe.jpg", alt: "The vibe-coded wireframe in a design tool" },
   { src: "/craft/04-polish.jpg", alt: "Typography, colour and graphics tiles around the work in progress" },
-  { src: "/craft/05-final.jpg", alt: "The finished, polished website in the browser" },
+  { src: "/craft/05-final.jpg", alt: "The finished website in the browser" },
 ];
 
 export const TESTIMONIALS = [
@@ -76,9 +76,10 @@ export const TESTIMONIALS = [
 export const CONTACT = {
   phone: "+92 318 4299873",
   phoneHref: "tel:+923184299873",
-  email: "shahzaibahmad6789@gmail.com",
+  email: "contact@shahzaibahmad05.me",
   whatsapp: "https://wa.me/923184299873",
   github: "https://github.com/ShahzaibAhmad05",
   linkedin: "https://www.linkedin.com/in/shahzaibahmad05/",
   pypi: "https://pypi.org/project/gitree/",
+  calendly: "https://calendly.com/shahzaibahmad6789",
 };

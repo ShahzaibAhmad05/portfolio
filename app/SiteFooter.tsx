@@ -19,6 +19,7 @@ const COLUMNS = [
       { label: "Contact", href: "#contact" },
       { label: "Email", href: `mailto:${CONTACT.email}` },
       { label: "WhatsApp", href: CONTACT.whatsapp },
+      { label: "Schedule a meeting", href: CONTACT.calendly },
     ],
   },
   {
@@ -66,7 +67,7 @@ export default function SiteFooter() {
     <footer data-section="footer" className="overflow-hidden bg-ink px-[clamp(16px,2.5vw,36px)] pt-[60px] text-background">
       <div className="grid grid-cols-2 gap-y-10 md:grid-cols-[242px_242px_307px_1fr]">
         {COLUMNS.map((col) => (
-          <nav key={col.label} aria-label={col.label} className="flex flex-col gap-4">
+          <nav key={col.label} aria-label={col.label} className="flex flex-col items-start gap-4">
             {col.links.map((link) => (
               <Link
                 key={link.label}
@@ -79,7 +80,7 @@ export default function SiteFooter() {
             ))}
           </nav>
         ))}
-        <span className="text-lg leading-[27px]">© Copyright Shahzaib {new Date().getFullYear()}</span>
+        <span className="text-lg leading-[27px]">© Shahzaib {new Date().getFullYear()}</span>
       </div>
       <div className="mt-[clamp(96px,16vw,230px)]">
         <Wordmark />

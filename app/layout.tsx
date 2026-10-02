@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Instrument_Serif, JetBrains_Mono, Source_Serif_4 } from "next/font/google";
+import { Fraunces, JetBrains_Mono, Source_Serif_4 } from "next/font/google";
 import localFont from "next/font/local";
 import FaviconCycle from "@/components/FaviconCycle";
 import LenisProvider from "@/components/LenisProvider";
@@ -35,20 +35,13 @@ const mono = JetBrains_Mono({
   display: "swap",
 });
 
-// Geist (Google Fonts, OFL) for small interface labels, such as the Book a call pill
-const ui = Geist({
-  variable: "--font-ui-face",
-  subsets: ["latin"],
-  weight: ["500"],
-  display: "swap",
-});
-
-// Instrument Serif (Google Fonts, OFL) for the wordmark in the header
-const logo = Instrument_Serif({
+// Fraunces (Google Fonts, OFL) for the wordmark in the header: its italic, set extra light,
+// with the soft and "wonky" axes the wordmark turns up (see .font-logo in globals.css)
+const logo = Fraunces({
   variable: "--font-logo-face",
   subsets: ["latin"],
-  weight: ["400"],
-  style: ["normal", "italic"],
+  style: ["italic"],
+  axes: ["SOFT", "WONK", "opsz"],
   display: "swap",
 });
 
@@ -68,7 +61,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${sans.variable} ${serif.variable} ${mono.variable} ${ui.variable} ${logo.variable} h-full antialiased`}
+      className={`${sans.variable} ${serif.variable} ${mono.variable} ${logo.variable} h-full antialiased`}
     >
       <body className={`${sans.className} min-h-full`}>
         <LenisProvider>
