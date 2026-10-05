@@ -17,7 +17,7 @@ export default function WorkSection() {
       <div className="mb-24 flex max-w-[751px] flex-col gap-3 md:ml-8">
         <span className="font-serif text-[18.18px] leading-[25.452px] italic">Selected works</span>
         <h2 className="font-serif text-[21.26px] leading-[25.512px] font-normal">
-          Things I built solo, being used by real people
+          Things I built solo, and tested on an audience
         </h2>
       </div>
 

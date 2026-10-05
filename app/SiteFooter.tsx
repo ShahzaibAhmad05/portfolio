@@ -16,7 +16,6 @@ const COLUMNS = [
   {
     label: "Get in touch",
     links: [
-      { label: "Contact", href: "#contact" },
       { label: "Email", href: `mailto:${CONTACT.email}` },
       { label: "WhatsApp", href: CONTACT.whatsapp },
       { label: "Schedule a meeting", href: CONTACT.calendly },
@@ -27,7 +26,6 @@ const COLUMNS = [
     links: [
       { label: "GitHub", href: CONTACT.github },
       { label: "LinkedIn", href: CONTACT.linkedin },
-      { label: "PyPI", href: CONTACT.pypi },
     ],
   },
 ];

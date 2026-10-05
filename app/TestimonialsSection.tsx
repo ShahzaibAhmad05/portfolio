@@ -13,7 +13,7 @@ export default function TestimonialsSection() {
     <section
       id="testimonials"
       data-section="testimonials"
-      className="relative z-10 scroll-mt-[88px] rounded-b-[40px] bg-background px-[clamp(20px,9.72vw,140px)] py-[clamp(88px,8.9vw,128px)]"
+      className="relative z-10 scroll-mt-[88px] bg-background px-[clamp(20px,9.72vw,140px)] py-[clamp(88px,8.9vw,128px)]"
     >
       <div className="mb-14 flex flex-col gap-3">
         <span className="font-serif text-[18.18px] leading-[25.452px] italic">Testimonials</span>
@@ -33,7 +33,7 @@ export default function TestimonialsSection() {
                 <Image src={item.avatar} alt={item.name} width={42} height={42} className="size-[42px] rounded-full object-cover" />
                 <div className="flex flex-col gap-0.5">
                   <span className="text-lg leading-[27px] font-semibold">{item.name}</span>
-                  <span className="text-[13px] leading-[20.8px] text-foreground-dim">{item.role}</span>
+                  <span className="text-xs leading-[20.8px] text-foreground-dim">{item.role}</span>
                 </div>
               </figcaption>
             </Reveal>

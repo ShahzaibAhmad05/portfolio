@@ -14,16 +14,16 @@ export default function ContactSection() {
       <section
         id="contact"
         data-section="contact"
-        className="flex min-h-[calc(clamp(520px,52.8vw,760px)+40px)] scroll-mt-12 flex-col items-center justify-center gap-11 rounded-b-[40px] bg-accent px-[clamp(20px,9.72vw,140px)] pt-34 pb-24 text-center"
+        className="flex min-h-[calc(clamp(520px,52.8vw,760px)+40px)] scroll-mt-12 flex-col items-center justify-center gap-11 bg-accent px-[clamp(20px,9.72vw,140px)] pt-34 pb-24 text-center"
       >
         <h2 className="m-0 max-w-[16ch] text-[clamp(40px,5.28vw,76px)] leading-[1.12] font-normal tracking-[-1px]">
-          Ready to build a <br/>revenue stream?
+          Ready to see <br/>another revenue?
         </h2>
         <button
           type="button"
           onClick={openForm}
           aria-haspopup="dialog"
-          className="flex h-[50px] cursor-pointer items-center gap-3.5 rounded-full bg-black pr-[26px] pl-7 text-xl leading-none text-background"
+          className="flex h-[50px] cursor-pointer items-center gap-3.5 bg-black pr-[26px] pl-7 text-xl leading-none text-background"
         >
           It&rsquo;s one click away
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>

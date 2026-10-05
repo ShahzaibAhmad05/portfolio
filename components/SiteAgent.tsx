@@ -303,9 +303,9 @@ function LiveMarker() {
 }
 
 const FIELD =
-  "w-full border border-on-ink/20 bg-on-ink/5 px-3.5 py-3 text-[15px] leading-[22px] tracking-normal text-background outline-none transition-colors duration-150 placeholder:text-on-ink/45 focus:border-on-ink/60";
+  "w-full border border-on-ink/20 bg-on-ink/5 px-3.5 py-3 text-sm tracking-normal text-background outline-none transition-colors duration-150 placeholder:text-on-ink/45 focus:border-on-ink/60";
 const ACTION =
-  "rounded-full bg-accent px-3.5 py-1.5 text-sm font-semibold tracking-normal text-black transition-opacity duration-150 hover:opacity-85";
+  "bg-accent px-3.5 py-1.5 text-sm font-semibold tracking-normal text-black transition-opacity duration-150 hover:opacity-85";
 
 /** One question of the idea form, as it sits inside the agent's bubble: a box to type in and a Done button. */
 function IdeaField({
@@ -486,11 +486,11 @@ function AgentChat({ start, closeButton, onClose }: { start: ChatStart; closeBut
   // the reply in progress shares the key its finished bubble will get, so it never re-animates
   const shown: Message[] = draft === null ? messages : [...messages, { from: "bot", text: draft }];
   const options = topic?.more ?? TOPICS;
-  const chip = "agent-in rounded-full border px-3.5 py-2 text-sm tracking-normal transition-colors duration-150";
+  const chip = "agent-in border px-3.5 py-2 text-sm tracking-normal transition-colors duration-150";
 
   return (
     <div
-      className="agent-fade fixed inset-0 z-[60] flex items-center justify-center bg-[rgba(21,22,18,0.35)] backdrop-blur-[8px]"
+      className="agent-fade fixed inset-0 z-[60] flex items-center justify-center bg-[rgba(21,22,18,0.35)] backdrop-blur-[3px]"
       onClick={(e) => e.target === e.currentTarget && onClose()}
       data-lenis-prevent
     >
@@ -508,7 +508,7 @@ function AgentChat({ start, closeButton, onClose }: { start: ChatStart; closeBut
             <button
               type="button"
               onClick={onClose}
-              className="my-2 rounded-full border border-on-ink/20 px-3.5 py-2 text-sm tracking-normal text-on-ink/80 transition-colors duration-150 hover:border-accent hover:text-accent"
+              className="my-2 border border-on-ink/20 px-3.5 py-2 text-sm tracking-normal text-on-ink/80 transition-colors duration-150 hover:border-accent hover:text-accent"
             >
               Close
             </button>
@@ -525,12 +525,12 @@ function AgentChat({ start, closeButton, onClose }: { start: ChatStart; closeBut
               return (
                 <div
                   key={i}
-                  className={`agent-in whitespace-pre-line px-4 py-3 text-[15px] leading-[22px] tracking-normal ${
+                  className={`agent-in whitespace-pre-line px-4 py-3 text-sm tracking-normal ${
                     m.from === "bot" ? "self-start bg-on-ink/8 text-background" : "self-end bg-accent text-black"
                   } ${field ? "w-full" : "max-w-[82%]"}`}
                 >
                   {m.text || (
-                    <span aria-label="Typing" className="flex h-[22px] items-center gap-1">
+                    <span aria-label="Typing" className="flex h-5 items-center gap-1">
                       {[0, 1, 2].map((d) => (
                         <span key={d} className="agent-dot size-1.5 rounded-full bg-on-ink/70" style={{ animationDelay: `${d * 140}ms` }} />
                       ))}
@@ -558,7 +558,7 @@ function AgentChat({ start, closeButton, onClose }: { start: ChatStart; closeBut
             })}
           </div>
         </div>
-        {/* while a reply is typing the next menu holds its space unseen, then its pills rise in one by one */}
+        {/* while a reply is typing the next menu holds its space unseen, then its chips rise in one by one */}
         <div
           key={`${path.length}-${topic?.q ?? "menu"}-${busy}`}
           className={`flex flex-wrap gap-2 border-t border-on-ink/12 px-[22px] pt-4 pb-[22px] ${busy ? "pointer-events-none invisible" : ""}`}
@@ -667,7 +667,7 @@ export default function SiteAgent() {
     let lastT = 0;
     let blinkAt = performance.now() + TUNE.BLINK_FIRST_MS; // the moment the eyes are fully shut
     let blinkAgain = Math.random() < TUNE.DOUBLE_BLINK_CHANCE;
-    const cursor = { x: vw / 2, y: vh / 2, w: TUNE.CURSOR_DOT_PX, h: TUNE.CURSOR_DOT_PX, fill: 1, tone: 0 }; // tone: 0 dark cursor, 1 light
+    const cursor = { x: vw / 2, y: vh / 2, w: TUNE.CURSOR_DOT_PX, h: TUNE.CURSOR_DOT_PX, fill: 1, round: 1, tone: 0 }; // round: 1 full corners, 0 square; tone: 0 dark cursor, 1 light
     let mouse: { x: number; y: number } | null = null;
     let hoverLabel: string | null = null, hoverRing = false, inModal = false, inText = false, onDark = false, groundAt = 0;
     let agentTone = 0; // 0 ink body, 1 accent body
@@ -866,8 +866,7 @@ export default function SiteAgent() {
       ctx.shadowBlur = 18;
       ctx.shadowOffsetY = 6;
       ctx.fillStyle = dark ? "#F8F9F3" : INK;
-      rr(ctx, bx, by, w, h, 12);
-      ctx.fill();
+      ctx.fillRect(bx, by, w, h);
       ctx.beginPath();
       if (below) {
         ctx.moveTo(tx - 7, by);
@@ -955,25 +954,26 @@ export default function SiteAgent() {
       cursor.x += (mouse.x - cursor.x) * 0.35;
       cursor.y += (mouse.y - cursor.y) * 0.35;
       const talk = !open && Math.hypot(mouse.x - pos.x, mouse.y - pos.y) < R + TUNE.NEAR_PX * 0.6;
-      // dot by default; a hollow ring over [CURSOR_RING] targets; a capsule with
+      // dot by default; a hollow ring over [CURSOR_RING] targets; a sharp-cornered box with
       // text over the agent ("talk") and over anything with [data-cursor-label];
       // a thin upright bar over text fields
       const label = open || inText ? null : talk ? "TALK" : hoverLabel;
       const ring = !open && !inText && !label && hoverRing;
       ctx.save();
-      ctx.font = `400 15px ${sans}`;
+      ctx.font = `400 14px ${sans}`;
       ctx.letterSpacing = TUNE.CURSOR_LABEL_SPACING;
-      const T = label ? [Math.ceil(ctx.measureText(label).width) + 36, 38] : ring ? [TUNE.CURSOR_RING_PX, TUNE.CURSOR_RING_PX] : inText ? [TUNE.CURSOR_BAR_W, TUNE.CURSOR_BAR_H] : [TUNE.CURSOR_DOT_PX, TUNE.CURSOR_DOT_PX];
+      const T = label ? [Math.ceil(ctx.measureText(label).width) + 24, 32] : ring ? [TUNE.CURSOR_RING_PX, TUNE.CURSOR_RING_PX] : inText ? [TUNE.CURSOR_BAR_W, TUNE.CURSOR_BAR_H] : [TUNE.CURSOR_DOT_PX, TUNE.CURSOR_DOT_PX];
       const k = 1 - Math.exp(-dt / (TUNE.CURSOR_MS / 3));
       cursor.w += (T[0] - cursor.w) * k;
       cursor.h += (T[1] - cursor.h) * k;
       cursor.fill += ((ring ? 0 : 1) - cursor.fill) * k;
+      cursor.round += ((label ? 0 : 1) - cursor.round) * k;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       // one solid colour, picked against the ground; the hollow ring keeps only the outline
       const mix = (t: number) => mixRgb(CURSOR_RGB.ink, CURSOR_RGB.fill, t);
       const ink = mix(cursor.tone);
-      rr(ctx, cursor.x - cursor.w / 2, cursor.y - cursor.h / 2, cursor.w, cursor.h, Math.min(cursor.w, cursor.h) / 2);
+      rr(ctx, cursor.x - cursor.w / 2, cursor.y - cursor.h / 2, cursor.w, cursor.h, (Math.min(cursor.w, cursor.h) / 2) * cursor.round);
       ctx.fillStyle = ink;
       ctx.globalAlpha = cursor.fill;
       ctx.fill();

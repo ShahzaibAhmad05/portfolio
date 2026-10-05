@@ -48,7 +48,7 @@ function Clock() {
   return (
     <time aria-label="Local time in Pakistan" className="flex items-start gap-[1px] text-lg leading-[27px] tabular-nums">
       {time ?? "--:--"}
-      <sup className="top-0 font-serif text-[13px] leading-[16.8px] tracking-[0.12px]">PK</sup>
+      <sup className="top-0 font-serif text-xs leading-[16.8px] tracking-[0.12px]">PK</sup>
     </time>
   );
 }
@@ -167,7 +167,7 @@ export default function SiteHeader() {
             <Clock />
             <span
               role="tooltip"
-              className="pointer-events-none absolute top-full right-0 mt-2 translate-y-1 bg-foreground px-2.5 py-1.5 text-xs leading-4 whitespace-nowrap text-background opacity-0 transition-[opacity,transform] duration-150 group-hover:translate-y-0 group-hover:opacity-100"
+              className="pointer-events-none absolute top-full right-0 mt-2 translate-y-1 bg-foreground px-2.5 py-1.5 text-xs leading-4 tracking-[0.2px] whitespace-nowrap text-background opacity-0 transition-[opacity,transform] duration-150 group-hover:translate-y-0 group-hover:opacity-100"
             >
               Local Time for Shahzaib
             </span>
