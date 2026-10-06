@@ -3,6 +3,7 @@
 import gsap from "gsap";
 import { useLenis } from "lenis/react";
 import { useEffect, useRef, useState } from "react";
+import Wordmark from "@/components/Wordmark";
 
 /*
  * The entrance: a full-screen accent cover with the wordmark on it, whose bottom
@@ -70,8 +71,8 @@ export default function Preloader() {
           <path ref={pathRef} d={path(COVERED)} />
         </clipPath>
       </svg>
-      <span ref={markRef} className="font-logo text-[clamp(32px,8.4vw,130px)] leading-none font-extralight tracking-[-0.02em] whitespace-nowrap italic text-foreground">
-        Shahzaib&rsquo;s Portfolio
+      <span ref={markRef} className="block w-[clamp(280px,72vw,1100px)] text-foreground">
+        <Wordmark mark="phrase" className="h-auto w-full" strokeWidth={2.4} />
       </span>
       {/* nothing would ever lift the cover without scripts */}
       <noscript>

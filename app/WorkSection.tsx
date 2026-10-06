@@ -15,7 +15,7 @@ export default function WorkSection() {
       className="scroll-mt-[88px] rounded-b-3xl bg-background px-[clamp(16px,2.22vw,32px)] pt-[clamp(80px,8.9vw,128px)]"
     >
       <div className="mb-24 flex max-w-[751px] flex-col gap-3 md:ml-8">
-        <span className="font-serif text-[18.18px] leading-[25.452px] italic">Selected works</span>
+        <span className="font-serif text-[18.18px] leading-[25.452px] italic">Selected Projects</span>
         <h2 className="font-serif text-[21.26px] leading-[25.512px] font-normal">
           Things I built solo, and tested on an audience
         </h2>

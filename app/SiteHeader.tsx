@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import Wordmark from "@/components/Wordmark";
 
 const LINKS = [
   { href: "#work", label: "Work" },
@@ -130,17 +131,17 @@ export default function SiteHeader() {
           ref={logoRef}
           href="#top"
           tabIndex={gone ? -1 : undefined}
-          className="pointer-events-auto origin-left font-logo text-[clamp(32px,3.2vw,46px)] leading-[60px] tracking-[-0.5px] italic"
+          aria-label="Shahzaib"
+          className="pointer-events-auto flex h-[60px] origin-left items-center"
           style={{
             transform: collapsed
               ? `translate(calc(${MINI.inset + MINI.padLeft}px - var(--pad)), ${MINI.inset + MINI.height / 2 - 44}px) scale(${MINI.logoScale})`
               : "none",
-            // shrunk into the small bar the hairlines get too faint, so it takes one step more weight
-            fontWeight: collapsed ? 300 : 200,
-            transition: `transform ${SLIDE}, font-weight ${SLIDE}`,
+            transition: `transform ${SLIDE}`,
           }}
         >
-          Shahzaib
+          {/* shrunk into the small bar the stroke gets too faint, so it takes a heavier one */}
+          <Wordmark className="h-[clamp(36px,3.6vw,52px)] w-auto" strokeWidth={collapsed ? 4.5 : 3} />
         </Link>
         <div
           className={`flex items-center gap-[34px] ${collapsed ? "" : "pointer-events-auto"}`}

@@ -34,12 +34,6 @@
   --font-sans: var(--font-sans-face);
   --font-serif: var(--font-serif-face);
   --font-mono: var(--font-mono-face);
-  --font-logo: var(--font-logo-face);
-}
-
-/* the wordmark: Fraunces with soft terminals and its quirky alternate letterforms on */
-.font-logo {
-  font-variation-settings: "SOFT" 100, "WONK" 0;
 }
 
 body {

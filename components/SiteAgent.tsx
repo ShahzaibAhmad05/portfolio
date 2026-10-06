@@ -106,7 +106,7 @@ const CURSOR_FLIP_AT = flipAt(CURSOR_RGB.ink, CURSOR_RGB.fill);
 const AGENT_RGB = { ink: hexRgb(INK), accent: hexRgb(ACCENT) };
 const AGENT_TONE_MS = 220;
 // hovering these turns the cursor into a hollow ring
-const CURSOR_RING = 'header a, footer a, #craft a[href*="calendly.com"], [aria-haspopup="dialog"]';
+const CURSOR_RING = 'header a, footer a, #craft a[href*="calendly.com"], [aria-haspopup="dialog"], [data-agent-chat] :is(a, button:enabled)';
 
 // x, y are fractions of the section's box, or of the viewport when `screen` is set
 type Spot = { x: number; y: number; size: number; screen?: boolean; drift?: boolean };
@@ -305,7 +305,7 @@ function LiveMarker() {
 const FIELD =
   "w-full border border-on-ink/20 bg-on-ink/5 px-3.5 py-3 text-sm tracking-normal text-background outline-none transition-colors duration-150 placeholder:text-on-ink/45 focus:border-on-ink/60";
 const ACTION =
-  "bg-accent px-3.5 py-1.5 text-sm font-semibold tracking-normal text-black transition-opacity duration-150 hover:opacity-85";
+  "bg-accent px-3.5 py-1.5 text-sm font-semibold tracking-normal text-black";
 
 /** One question of the idea form, as it sits inside the agent's bubble: a box to type in and a Done button. */
 function IdeaField({
@@ -486,7 +486,7 @@ function AgentChat({ start, closeButton, onClose }: { start: ChatStart; closeBut
   // the reply in progress shares the key its finished bubble will get, so it never re-animates
   const shown: Message[] = draft === null ? messages : [...messages, { from: "bot", text: draft }];
   const options = topic?.more ?? TOPICS;
-  const chip = "agent-in border px-3.5 py-2 text-sm tracking-normal transition-colors duration-150";
+  const chip = "agent-in border px-3.5 py-2 text-sm tracking-normal";
 
   return (
     <div
@@ -497,7 +497,8 @@ function AgentChat({ start, closeButton, onClose }: { start: ChatStart; closeBut
       <div
         role="dialog"
         aria-label="Chat Session"
-        className="flex h-[min(560px,calc(100dvh-32px))] w-[min(560px,calc(100vw-32px))] flex-col overflow-hidden border border-accent bg-ink text-background shadow-[0_30px_80px_rgba(21,22,18,0.35)]"
+        data-agent-chat
+        className="flex h-[min(560px,calc(100dvh-32px))] w-[min(560px,calc(100vw-32px))] flex-col overflow-hidden bg-ink text-background shadow-[0_30px_80px_rgba(21,22,18,0.35)]"
       >
         <div className="flex items-center justify-between border-b border-on-ink/12 px-[22px] py-2.5">
           <span className="flex items-center gap-2.5 text-[12px] tracking-[0.08em] text-on-ink/80 uppercase">
@@ -508,7 +509,7 @@ function AgentChat({ start, closeButton, onClose }: { start: ChatStart; closeBut
             <button
               type="button"
               onClick={onClose}
-              className="my-2 border border-on-ink/20 px-3.5 py-2 text-sm tracking-normal text-on-ink/80 transition-colors duration-150 hover:border-accent hover:text-accent"
+              className="my-2 border border-on-ink/20 px-3.5 py-2 text-sm tracking-normal text-on-ink/80"
             >
               Close
             </button>
@@ -517,7 +518,8 @@ function AgentChat({ start, closeButton, onClose }: { start: ChatStart; closeBut
             <span data-agent-seat aria-hidden className="shrink-0" style={{ width: SEAT_SIZE, height: SEAT_SIZE }} />
           )}
         </div>
-        <div ref={msgsRef} className="min-h-0 grow overflow-y-auto [scrollbar-color:#4A4B45_transparent] [scrollbar-width:thin]">
+        {/* the scrollbar's room is held from the start, so the bubbles do not narrow and rewrap when it appears */}
+        <div ref={msgsRef} className="min-h-0 grow overflow-y-auto [scrollbar-color:#4A4B45_transparent] [scrollbar-gutter:stable] [scrollbar-width:thin]">
           <div className="flex flex-col gap-2.5 p-[22px]">
             {shown.map((m, i) => {
               const links = (m.actions ?? []).filter((x) => x !== "form") as (keyof typeof LINKS)[];
@@ -568,7 +570,7 @@ function AgentChat({ start, closeButton, onClose }: { start: ChatStart; closeBut
               key={t.q}
               type="button"
               onClick={() => ask(t)}
-              className={`${chip} border-on-ink/25 text-background hover:border-accent hover:text-accent`}
+              className={`${chip} border-on-ink/25 text-background`}
               style={{ animationDelay: `${i * CHAT.CHIP_STAGGER}ms` }}
             >
               {t.q}
@@ -583,7 +585,7 @@ function AgentChat({ start, closeButton, onClose }: { start: ChatStart; closeBut
               key={b.label}
               type="button"
               onClick={b.go}
-              className={`${chip} border-transparent bg-on-ink/10 text-on-ink/80 hover:border-accent hover:text-accent`}
+              className={`${chip} border-transparent bg-on-ink/10 text-on-ink/80`}
               style={{ animationDelay: `${(options.length + i) * CHAT.CHIP_STAGGER}ms` }}
             >
               {b.label}
@@ -958,7 +960,7 @@ export default function SiteAgent() {
       // text over the agent ("talk") and over anything with [data-cursor-label];
       // a thin upright bar over text fields
       const label = open || inText ? null : talk ? "TALK" : hoverLabel;
-      const ring = !open && !inText && !label && hoverRing;
+      const ring = !inText && !label && hoverRing;
       ctx.save();
       ctx.font = `400 14px ${sans}`;
       ctx.letterSpacing = TUNE.CURSOR_LABEL_SPACING;
