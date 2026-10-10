@@ -25,6 +25,7 @@ const LEAVE_S = 0.8;
 
 export default function Preloader() {
   const [done, setDone] = useState(false);
+  const coverRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
   const markRef = useRef<HTMLSpanElement>(null);
   const lenis = useLenis();
@@ -37,9 +38,10 @@ export default function Preloader() {
   }, [lenis, done]);
 
   useEffect(() => {
+    const cover = coverRef.current;
     const el = pathRef.current;
     const mark = markRef.current;
-    if (!el || !mark) return;
+    if (!cover || !el || !mark) return;
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
       const id = setTimeout(() => setDone(true), HOLD_S * 1000);
       return () => clearTimeout(id);
@@ -48,12 +50,15 @@ export default function Preloader() {
     const draw = () => el.setAttribute("d", path(shape));
     const curved = matchMedia("(max-width: 768px)").matches ? CURVED_MOBILE : CURVED;
     const tl = gsap.timeline({ delay: HOLD_S, onComplete: () => setDone(true) });
+    // globals.css keeps the scrollbar away until this flag is set: it returns once, while the page is still fully covered
+    tl.call(() => cover.setAttribute("data-lifting", ""), [], 0);
     tl.to(mark, { yPercent: -20, duration: RISE_S, ease: "expo.out" });
     tl.to(shape, { endArray: curved, duration: RISE_S, ease: "expo.out", onUpdate: draw }, "<");
     tl.to(shape, { endArray: GONE, duration: LEAVE_S, ease: "power4.inOut", onUpdate: draw });
     tl.to(mark, { yPercent: -100, duration: LEAVE_S, ease: "power4.inOut" }, "<");
     return () => {
       tl.kill();
+      cover.removeAttribute("data-lifting");
       gsap.set(mark, { yPercent: 0 });
       el.setAttribute("d", path(COVERED));
     };
@@ -63,8 +68,10 @@ export default function Preloader() {
 
   return (
     <div
+      ref={coverRef}
       aria-hidden
-      className="preloader fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-accent [clip-path:url(#preloader-clip)]"
+      // w-screen, not inset-0: the cover keeps its width when the scrollbar returns, so the wordmark does not jump
+      className="preloader fixed inset-y-0 left-0 z-[9999] w-screen flex items-center justify-center overflow-hidden bg-accent [clip-path:url(#preloader-clip)]"
     >
       <svg width="0" height="0" className="absolute top-0 left-0">
         <clipPath id="preloader-clip" clipPathUnits="objectBoundingBox">
@@ -76,7 +83,7 @@ export default function Preloader() {
       </span>
       {/* nothing would ever lift the cover without scripts */}
       <noscript>
-        <style>{".preloader{display:none}"}</style>
+        <style>{".preloader{display:none}html{overflow:visible!important}"}</style>
       </noscript>
     </div>
   );

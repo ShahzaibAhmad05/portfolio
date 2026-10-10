@@ -44,6 +44,20 @@ body {
   overflow-x: hidden;
 }
 
+/* a slim scrollbar in the site's ink, on the paper itself */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--foreground-faint) transparent;
+}
+/* no scrollbar from the first paint while the entrance cover is up... */
+html:has(.preloader:not([data-lifting])) {
+  overflow: clip;
+}
+/* ...and it comes back once, as the cover starts to move; Lenis still holds the page until the cover is gone */
+html.lenis.lenis-stopped:has(.preloader[data-lifting]) {
+  overflow: visible;
+}
+
 ::selection {
   background: var(--accent);
   color: var(--foreground);
