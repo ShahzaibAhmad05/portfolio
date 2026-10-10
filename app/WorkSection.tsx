@@ -39,7 +39,7 @@ export default function WorkSection() {
               <p className="mb-[18px] text-lg leading-[28.8px]">
                 <CodeText text={work.summary} />
               </p>
-              <div className="mt-3 flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-x-1.5 gap-y-1">
                 <span className="h-6 bg-foreground px-2 font-serif text-xs leading-6 tracking-[0.12px] text-on-ink">{work.stat}</span>
                 {work.tags.map((tag) => (
                   <span
