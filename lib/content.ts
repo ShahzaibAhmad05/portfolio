@@ -1,8 +1,19 @@
+import type { StaticImageData } from "next/image";
+// imported, not referenced by path: the build fingerprints each file (cached forever) and bakes in its size and blur preview
+import iris from "@/public/work/iris.webp";
+import gitree from "@/public/work/gitree.webp";
+import nextsearch from "@/public/work/nextsearch.webp";
+import craftEmail from "@/public/craft/01-email.webp";
+import craftAnalyze from "@/public/craft/02-analyze.webp";
+import craftWireframe from "@/public/craft/03-wireframe.webp";
+import craftPolish from "@/public/craft/04-polish.webp";
+import craftFinal from "@/public/craft/05-final.webp";
+
 export type Work = {
   title: string;
   summary: string;
   tags: string[];
-  image: string;
+  image: StaticImageData;
   /** width / height of the tile's media */
   ratio: "16/9" | "4/3";
   href: string;
@@ -16,7 +27,7 @@ export const WORK: Work[] = [
     summary:
       "A digital logic circuit simulator. Draw a circuit on paper, photograph it, and it becomes a running simulation. No LLMs, no paid APIs.",
     tags: ["Desktop", "Computer vision", "Open source"],
-    image: "/work/iris.webp",
+    image: iris,
     ratio: "16/9",
     href: "https://github.com/d-khalid/IRis",
     align: "end",
@@ -26,7 +37,7 @@ export const WORK: Work[] = [
     summary:
       "A command-line replacement for `ls` that reads folder structures and packages an entire codebase for an LLM prompt. Open source, published on PyPI.",
     tags: ["Developer tooling", "Python", "Open source"],
-    image: "/work/gitree.webp",
+    image: gitree,
     ratio: "16/9",
     href: "https://github.com/ShahzaibAhmad05/gitree",
     align: "start",
@@ -36,7 +47,7 @@ export const WORK: Work[] = [
     summary:
       "A search engine written in C++ over the 1M-article CORD-19 research corpus. Inverted index with BM25 ranking, lexicon-backed autocomplete, and AI overviews layered on top.",
     tags: ["Search systems", "C++", "AI"],
-    image: "/work/nextsearch.webp",
+    image: nextsearch,
     ratio: "4/3",
     href: "https://github.com/ShahzaibAhmad05/NextSearch-api",
     align: "end",
@@ -45,11 +56,11 @@ export const WORK: Work[] = [
 
 /** Cards for the pinned "Turning vibe-coded / to hand-crafted" scroller, in story order. */
 export const CRAFT_CARDS = [
-  { src: "/craft/01-email.jpg", alt: "A client email asking for help finishing an AI-generated website" },
-  { src: "/craft/02-analyze.jpg", alt: "The attached files opened for analysis" },
-  { src: "/craft/03-wireframe.jpg", alt: "The vibe-coded wireframe in a design tool" },
-  { src: "/craft/04-polish.jpg", alt: "Typography, colour and graphics tiles around the work in progress" },
-  { src: "/craft/05-final.jpg", alt: "The finished website in the browser" },
+  { src: craftEmail, alt: "A client email asking for help finishing an AI-generated website" },
+  { src: craftAnalyze, alt: "The attached files opened for analysis" },
+  { src: craftWireframe, alt: "The vibe-coded wireframe in a design tool" },
+  { src: craftPolish, alt: "Typography, colour and graphics tiles around the work in progress" },
+  { src: craftFinal, alt: "The finished website in the browser" },
 ];
 
 export const TESTIMONIALS = [

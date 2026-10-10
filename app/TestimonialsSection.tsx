@@ -30,7 +30,7 @@ export default function TestimonialsSection() {
                 <span aria-hidden className={`${MARK} ml-0.5`}>”</span>
               </blockquote>
               <figcaption className="mt-auto flex items-center gap-3 border-t border-hairline-strong pt-5">
-                <Image src={item.avatar} alt={item.name} width={42} height={42} className="size-[42px] rounded-full object-cover" />
+                <Image src={item.avatar} alt={item.name} width={42} height={42} loading="eager" className="size-[42px] rounded-full object-cover" />
                 <div className="flex flex-col gap-0.5">
                   <span className="text-lg leading-[27px] font-semibold">{item.name}</span>
                   <span className="text-xs leading-[20.8px] text-foreground-dim">{item.role}</span>

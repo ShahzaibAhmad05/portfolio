@@ -141,11 +141,11 @@ export default function CraftSection() {
         >
           {CRAFT_CARDS.map((card) => (
             <div
-              key={card.src}
+              key={card.src.src}
               data-craft-card
               className="relative aspect-square w-[clamp(300px,50vw,400px)] shrink-0 overflow-hidden bg-surface"
             >
-              <Image src={card.src} alt={card.alt} fill sizes="400px" className="object-cover" />
+              <Image src={card.src} alt={card.alt} fill sizes="400px" loading="eager" placeholder="blur" className="object-cover" />
             </div>
           ))}
         </div>

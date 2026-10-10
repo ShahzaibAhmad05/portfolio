@@ -33,7 +33,7 @@ export default function WorkSection() {
                 className="relative block w-full overflow-hidden bg-surface"
                 style={{ aspectRatio: work.ratio }}
               >
-                <Image src={work.image} alt={`${work.title} preview`} fill sizes="(min-width: 800px) 760px, 100vw" className="object-cover" />
+                <Image src={work.image} alt={`${work.title} preview`} fill sizes="(min-width: 800px) 760px, 100vw" loading="eager" placeholder="blur" className="object-cover" />
               </a>
               <span className="mt-[18px] font-serif text-[18.18px] leading-[25.45px]">{work.title}</span>
               <p className="mb-[18px] text-lg leading-[28.8px]">
