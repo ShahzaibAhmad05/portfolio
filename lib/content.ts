@@ -12,6 +12,8 @@ import craftFinal from "@/public/craft/05-final.webp";
 export type Work = {
   title: string;
   summary: string;
+  /** the headline number, shown as the first, inked tag */
+  stat: string;
   tags: string[];
   image: StaticImageData;
   /** width / height of the tile's media */
@@ -26,6 +28,7 @@ export const WORK: Work[] = [
     title: "IRis + SketchLogic",
     summary:
       "A digital logic circuit simulator. Draw a circuit on paper, photograph it, and it becomes a running simulation. No LLMs, no paid APIs.",
+    stat: "500+ code clones",
     tags: ["Desktop", "Computer vision", "Open source"],
     image: iris,
     ratio: "16/9",
@@ -36,6 +39,7 @@ export const WORK: Work[] = [
     title: "gitree",
     summary:
       "A command-line replacement for `ls` that reads folder structures and packages an entire codebase for an LLM prompt. Open source, published on PyPI.",
+    stat: "2k+ downloads",
     tags: ["Developer tooling", "Python", "Open source"],
     image: gitree,
     ratio: "16/9",
@@ -46,6 +50,7 @@ export const WORK: Work[] = [
     title: "NextSearch",
     summary:
       "A search engine written in C++ over the 1M-article CORD-19 research corpus. Inverted index with BM25 ranking, lexicon-backed autocomplete, and AI overviews layered on top.",
+    stat: "1k+ searches",
     tags: ["Search systems", "C++", "AI"],
     image: nextsearch,
     ratio: "4/3",

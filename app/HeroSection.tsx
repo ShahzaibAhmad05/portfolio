@@ -99,15 +99,16 @@ export default function HeroSection() {
           with <RotatingWord />
         </span>
       </h1>
-      <div className="relative min-h-[320px] grow overflow-hidden bg-surface">
+      {/* black until the showreel has its first frame */}
+      <div className="relative min-h-[320px] grow overflow-hidden bg-black">
         <video
           className="absolute inset-0 h-full w-full object-cover"
-          src="/video/hero-v2.mp4"
+          src="/video/hero-v3.mp4"
           autoPlay
           muted
           loop
           playsInline
-          preload="metadata"
+          preload="auto"
           aria-label="Showreel"
         />
       </div>

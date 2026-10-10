@@ -40,10 +40,11 @@ export default function WorkSection() {
                 <CodeText text={work.summary} />
               </p>
               <div className="mt-3 flex flex-wrap gap-1">
+                <span className="h-6 bg-foreground px-2 font-serif text-xs leading-6 tracking-[0.12px] text-on-ink">{work.stat}</span>
                 {work.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="h-6 rounded-[800px] bg-foreground/5 px-3 font-serif text-xs leading-6 tracking-[0.12px]"
+                    className="h-6 bg-foreground/5 px-2 font-serif text-xs leading-6 tracking-[0.12px]"
                   >
                     {tag}
                   </span>

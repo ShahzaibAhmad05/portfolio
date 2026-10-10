@@ -19,9 +19,27 @@ const GONE: Shape = [0, 0, 0, 0.289, 0, 1, 0, 1, 0]; // edge flat against the to
 
 const path = (s: Shape) => `M0 ${s[0]} S ${s[1]} ${s[2]} ${s[3]} ${s[4]} S ${s[5]} ${s[6]} ${s[7]} ${s[8]} L 1 0 H 0 Z`;
 
-const HOLD_S = 0.5; // the wordmark sits still on the cover
+const HOLD_S = 0.5; // the wordmark sits still on the cover, at least this long
+const WAIT_CAP_S = 2; // ...and at most this long, however slow the network
 const RISE_S = 1;
 const LEAVE_S = 0.8;
+
+/** Settles once what the cover is hiding is ready to be seen: fonts in, images decoded, the showreel on its first frame. Never later than the cap. */
+function pageReady() {
+  const images = Array.from(document.images)
+    .filter((img) => img.loading !== "lazy")
+    .map((img) => img.decode().catch(() => {}));
+  const videos = Array.from(document.querySelectorAll<HTMLVideoElement>("video[autoplay]")).map(
+    (video) =>
+      new Promise<void>((resolve) => {
+        if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA || video.error) return resolve();
+        video.addEventListener("loadeddata", () => resolve(), { once: true });
+        video.addEventListener("error", () => resolve(), { once: true });
+      }),
+  );
+  const cap = new Promise<void>((resolve) => setTimeout(resolve, WAIT_CAP_S * 1000));
+  return Promise.race([Promise.all([document.fonts.ready, ...images, ...videos]), cap]);
+}
 
 export default function Preloader() {
   const [done, setDone] = useState(false);
@@ -49,14 +67,21 @@ export default function Preloader() {
     const shape = [...COVERED];
     const draw = () => el.setAttribute("d", path(shape));
     const curved = matchMedia("(max-width: 768px)").matches ? CURVED_MOBILE : CURVED;
-    const tl = gsap.timeline({ delay: HOLD_S, onComplete: () => setDone(true) });
+    const tl = gsap.timeline({ paused: true, onComplete: () => setDone(true) });
     // globals.css keeps the scrollbar away until this flag is set: it returns once, while the page is still fully covered
     tl.call(() => cover.setAttribute("data-lifting", ""), [], 0);
     tl.to(mark, { yPercent: -20, duration: RISE_S, ease: "expo.out" });
     tl.to(shape, { endArray: curved, duration: RISE_S, ease: "expo.out", onUpdate: draw }, "<");
     tl.to(shape, { endArray: GONE, duration: LEAVE_S, ease: "power4.inOut", onUpdate: draw });
     tl.to(mark, { yPercent: -100, duration: LEAVE_S, ease: "power4.inOut" }, "<");
+    // lift after the hold, or as soon after it as the page underneath is ready
+    let cancelled = false;
+    const hold = new Promise<void>((resolve) => setTimeout(resolve, HOLD_S * 1000));
+    Promise.all([hold, pageReady()]).then(() => {
+      if (!cancelled) tl.play();
+    });
     return () => {
+      cancelled = true;
       tl.kill();
       cover.removeAttribute("data-lifting");
       gsap.set(mark, { yPercent: 0 });

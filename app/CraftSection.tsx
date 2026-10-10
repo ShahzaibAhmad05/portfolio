@@ -6,6 +6,7 @@ import { useLenis } from "lenis/react";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { CONTACT, CRAFT_CARDS } from "@/lib/content";
+import pfp from "@/public/pfp-small.webp";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -156,7 +157,7 @@ export default function CraftSection() {
           rel="noreferrer"
           className="absolute bottom-[30px] left-1/2 z-[4] flex -translate-x-1/2 items-center bg-foreground p-1 text-on-ink"
         >
-          <Image src="/pfp.webp" alt="" width={44} height={44} unoptimized className="size-11 bg-background object-cover" />
+          <Image src={pfp} alt="" width={44} height={44} loading="eager" className="size-11 bg-background object-cover" />
           <span className="mx-4 text-base leading-none font-medium tracking-wide whitespace-nowrap">Schedule a meeting</span>
           <span className="flex size-11 items-center justify-center bg-background">
             {/* the Calendly mark (Simple Icons), in the site ink */}
